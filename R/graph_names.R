@@ -1,4 +1,6 @@
-graph_names = function(path_to_csv, base = "https://iisg.amsterdam/resource/hsn/", sub_path){
+graph_names = function(path_to_csv, 
+    base = "https://iisg.amsterdam/resource/hsn/", 
+    sub_path = ""){
 
     filehash = git2r::hashfile(path_to_csv)
     now = format(Sys.time(), "%Y-%m-%dT%H:%M")
