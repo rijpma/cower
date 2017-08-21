@@ -41,3 +41,24 @@ bnode = function(n = 1){
     replicate(n, paste0("_:N", gsub("-", "", uuid::UUIDgenerate())))
      # N in nq serialisation to make NCName compliant-ish
 }
+
+# todo: have uris and triples in one go? have multiple bases possible and have one = recyle
+# merge paths into base?
+# make paths optional 
+# make it possible to combine
+# support column names and types into named list?
+convert = function(df, column_names, base, paths,
+    type = c("uri", "literal"), datatypes = "xsd:string"){
+
+    type = match.arg(type)
+
+    if (type == "uri"){
+        string_to_eval = paste0(df, "[, ", column_names, ":= uriref(", 
+            column_names, ", base = '", base, "', path = '", paths, "')]")
+     } else if (type == "literal"){
+        string_to_eval = paste0(df, "[, ", column_names, ":= literal(", 
+            column_names, ", datatype = '", datatypes, "')]")
+    }
+
+    eval(parse(text = string_to_eval), envir = parent.frame(2))
+}
