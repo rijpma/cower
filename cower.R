@@ -8,45 +8,96 @@ library("data.table")
 library("jsonlite")
 library("stringi")
 library("urltools")
+library("jsonld")
+library("devtools")
 
-to_replace = "[ %+&]"
-base = "https://iisg.amsterdam/resource/hsn/"
-path_to_csv = "/Users/auke/repos/sdh-private-hsn/hsndbf/BEVDYNAP.DBF.csv.gz"
-path_to_metadata = "/Users/auke/repos/sdh-private-hsn/hsndbf/BEVDYNAP.DBF.csv-metadata.json"
+devtools::load_all("~/repos/cower")
+
+base = "https://iisg.amsterdam/test/"
+path_to_csv = "/Users/auke/repos/cower/test.csv"
+path_to_metadata = "/Users/auke/repos/cower/test.csv-metadata.json"
+# base = "https://iisg.amsterdam/resource/hsn/"
+# path_to_csv = "/Users/auke/repos/sdh-private-hsn/hsndbf/BEVDYNAP.DBF.csv.gz"
+# path_to_metadata = "/Users/auke/repos/sdh-private-hsn/hsndbf/BEVDYNAP.DBF.csv-metadata.json"
 sub_path = 'bevdynap/'
 
-literal = function(string, datatype = "xsd:string"){
-    # needs to return NA
-    ifelse(is.na(string), NA, paste0('"', string, '"^^', datatype))
-}
-uriref = function(string, base, path){
-    ifelse(is.na(string), NA, 
-    paste0("<", base, path, urltools::url_encode(gsub(to_replace, "_", string)), ">"))
-}
-mass = function(dt = "x", columns, type = c("uri", "literal"), paths, datatypes="xsd::string"){
+mass = function(dt = "x", columns, type = c("uri", "literal"), base = base, paths, datatypes="xsd::string"){
     type = match.arg(type)
     if (type == "uri"){
-        string = paste0(dt, "[, ", columns, ":= uriref(", columns, ", base = '", base, "', path = '", paths, "')]")
+        string = paste0(dt, "[, ", columns, ":= uriref(", 
+            columns, ", base = '", base, "', path = '", paths, "')]")
     } else if (type == "literal"){
-        string = paste0(dt, "[, ", columns, ":= literal(", columns, ", datatype = '", datatypes, "')]")
+        string = paste0(dt, "[, ", columns, ":= literal(", 
+            columns, ", datatype = '", datatypes, "')]")
     }
     eval(parse(text = string), envir = parent.frame(2))
 }
-bnode = function(n = 1){
-    replicate(n, paste0("_:N", gsub("-", "", uuid::UUIDgenerate())))
-     # N in nq serialisation to make NCName compliant-ish
+
+expand_context = function(uris, context = context){
+    for (prefix in names(context)){
+        uris[grepl(paste0("^", prefix, ":"), uris)] = gsub(paste0('^', prefix, ':'), context[prefix], uris[grepl(paste0("^", prefix, ":"), uris)])
+    }
+    for (prefix in names(context)){
+        uris[grepl(paste0("\\^\\^", prefix, ":"), uris)] = gsub(paste0('\\^\\^', prefix, ':'), paste0("^^", context[prefix]), uris[grepl(paste0("\\^\\^", prefix, ":"), uris)])
+    }
+    return(uris)
 }
 
+filehash = system(paste0("git hash-object ", path_to_csv), intern = TRUE)
+
+# fails quietly!
+# hash of the compressed file now...!?
+
+
+now = format(Sys.time(), "%Y-%m-%dT%H:%M")
+nanopub = paste0("<", base, sub_path, c('assertion/', 'nanopublication/', 'provenance/', 'pubinfo/', 'resource/'), substring(filehash, 1, 8), "/", now, ">")
+names(nanopub) = gsub(paste0("/", substring(filehash, 1, 8), paste0('.*|.*', sub_path)), '', nanopub)
+
 # set all to character
-x = data.table::fread(paste0("zcat < ", path_to_csv), colClasses = "character")
-
 metadata = jsonlite::fromJSON(path_to_metadata)
+context = metadata[['@context']][[3]]
+columns = metadata[['tableSchema']]$columns
 
-# for (prefix in names(metadata$`@context`[[3]])){
-#     metadata$tableSchema$columns[, c("propertyUrl", "valueUrl", "aboutUrl")] = 
-#         lapply(metadata$tableSchema$columns[, c("propertyUrl", "valueUrl", "aboutUrl")], 
-#             stringi::stri_replace_first_regex, paste0('^', prefix, ':'), metadata$`@context`[[3]][prefix])
-# }
+provenance = as.data.table(columns)
+setnames(provenance, names(provenance), gsub('.*:', '', names(provenance)))
+
+# mass("provenance", 
+#     columns = c("titles", "name",
+#                 "description", "virtual", "value"),
+#     type = "literal",
+#     datatypes = c("xsd:string", "xsd:string",
+#         "xsd:string", "xsd:boolean", "@en"), paths='') # proper language tag plz
+# toreplace = c("datatype", "propertyUrl", "valueUrl")
+# provenance[, (toreplace) := lapply(.SD, expand_context, context = context), .SDcols = toreplace]
+
+
+# setnames(provenance, old = c("datatype", "titles", "@id", "name", 
+#     "propertyUrl", "valueUrl", "description", "virtual", 
+#     "aboutUrl", "null", "value"),
+#     new = uriref(c('datatype', 'title', 'name', NA,
+#         "propertyUrl", "valueUrl", "description", "virtual",
+#         "aboutUrl", "null", "value"),
+#         base = c(rep(context$csvw, 6), context$dc, rep(context$csvw, 4))))
+# todo: use lists
+
+
+uriref(c('one', 'two'), base = c('http:/example.org/', 'http://that.com/'))
+
+
+# _:bnode14 rdf:first column:PKTYPE provgraph .
+# column:PKTYPE csvw:title "PKTYPE"@en provgraph .
+# column:PKTYPE csvw:name "PKTYPE" provgraph .
+# column:PKTYPE dc:description "Type persoonskaart"@en provgraph .
+# column:PKTYPE csvw:datatype xsd:string provgraph .
+# column:PKTYPE csvw:propertyUrl dimension:PKTYPE provgraph .
+# column:PKTYPE csvw:valueUrl <http://data.socialhistory.org/resource/hsn/code/PKTYPE/_PKTYPE_> provgraph .
+
+
+x = data.table::fread(paste0("zcat < ", path_to_csv), colClasses = "character")
+x = data.table::fread(path_to_csv, colClasses = "character")
+
+
+
 
 # go through file column by colum
 # check encoding and characters
@@ -61,19 +112,31 @@ metadata = jsonlite::fromJSON(path_to_metadata)
 # mass(dt = "x", columns = c("RELEASE", "DATUMCOR"), type='literal', datatypes= c( 'xsd:string', 'xsd:date'))
 
 # or
-uris = metadata$tableSchema$columns[!is.na(metadata$tableSchema$columns$valueUrl) & is.na(metadata$tableSchema$columns$virtual), ]
+# uris = metadata$tableSchema$columns[!is.na(metadata$tableSchema$columns$valueUrl) & is.na(metadata$tableSchema$columns$virtual), ]
+uris = metadata$tableSchema$columns[!is.na(metadata$tableSchema$columns$valueUrl), ]
 literals = metadata$tableSchema$columns[is.na(metadata$tableSchema$columns$valueUrl) & is.na(metadata$tableSchema$columns$virtual), ]
 
+
+# convert(df = "x",
+#         column_names = "Country",
+#         base = "http://www.example.org/",
+#         paths = gsub("hsn:", "", gsub("\\{.*", "", uris$valueUrl)),
+#         type = 'uri')
+
 mass(dt = "x", 
-    columns = uris$titles, 
+    columns = uris$titles[[1]], 
     type='uri', 
+    base = "http://www.example.org/",
     paths = gsub("hsn:", "", gsub("\\{.*", "", uris$valueUrl)))
 
+# having duplicate titles and then you do uriref on one and literal on the other
+# you combine uris with literal information
 mass(dt = "x", 
     columns = literals$titles, 
     type='literal', 
     datatypes = paste0("xsd:", gsub("xsd:", "", literals$datatype)))
-x[, subj := uriref(.I, base = base, path = "bevadres/")]
+
+x[, subj := uriref(.I, base = base, path = "countryobs/")]
 
 # x[, pred := uriref(pred, base = base, path = 'dimension/')]
 
@@ -101,8 +164,13 @@ virtuals = list(x[, list(subj = paste0(IDNR, "_", PERSNR),
 virtuals = rbindlist(virtuals)
 # rbindlist efficient?
 
-
+# turn column headers into urirefs
 names(x)[names(x) != 'subj'] = uriref(names(x)[names(x) != 'subj'], base = base, path = 'dimension/')
+
+# observation1 country qatar
+# observation1 income 131063
+# observation2 country lluxem
+# observation2 income 103906
 
 # melt (or is melt very bad performance-wise on larger dataset?)
 # seems fine
@@ -147,14 +215,6 @@ predicates[, pred := ifelse(pred == "description", uriref(pred, base = "http://p
 # , meta)
 # add hash
 
-filehash = system(paste0("git hash-object ", path_to_csv), intern = TRUE)
-# fails quietly!
-# hash of the compressed file now...!?
-
-
-now = format(Sys.time(), "%Y-%m-%dT%H:%M")
-nanopub = paste0("<", base, sub_path, c('assertion/', 'nanopublication/', 'provenance/', 'pubinfo/', 'resource/'), substring(filehash, 1, 8), "/", now, ">")
-names(nanopub) = gsub(paste0("/", substring(filehash, 1, 8), paste0('.*|.*', sub_path)), '', nanopub)
 
 x[, graph := nanopub["assertion"]]
 
@@ -179,8 +239,13 @@ predicates[, graph := nanopub['provenance']]
 # write separately?
 # swap sample and complete.cases for speed?
 # separate
-outfile = gzfile("~/desktop/test.nq.gz", 'w')
-write.table(x[complete.cases(pred, obj), list(subj, pred, obj, graph)][sample(.N, 1e5), ], 
+outfile = gzfile("~/repos/cower/test.nq.gz", 'w')
+write.table(x[complete.cases(pred, obj), list(subj, pred, obj, graph)], 
+    file = outfile, sep = ' ', quote = F, col.names = F, row.names = F)
+close(outfile)
+
+outfile = gzfile("~/repos/cower/test.nq.gz", 'a')
+write.table(predicates[complete.cases(pred, obj), list(subj, pred, obj, graph)], 
     file = outfile, sep = ' ', quote = F, col.names = F, row.names = F)
 close(outfile)
 

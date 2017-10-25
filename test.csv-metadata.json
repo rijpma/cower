@@ -95,7 +95,6 @@
     "dc:description": "Rank"
    }, 
    {
-    "datatype": "string", 
     "titles": [
      "Country"
     ], 
@@ -111,10 +110,10 @@
     "@id": "https://iisg.amsterdam/resource/test.csv/column/Country", 
     "name": "Country", 
     "dc:description": "Country",
-    "valueUrl": "name/Country"
+    "valueUrl": "countrycode/{Country}"
    }, 
    {
-    "datatype": "string", 
+    "datatype": "xsd:integer", 
     "titles": [
      "Int"
     ], 
