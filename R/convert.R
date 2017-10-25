@@ -47,10 +47,29 @@ bnode = function(n = 1){
 # make paths optional 
 # make it possible to combine
 # support column names and types into named list?
+# check for character-type df?
+# support non-character df?
+# default column names = all
+
+#' Efficiently convert selected columns of \code{data.table} to 
+#' nquad statements
+#' 
+#' @param df Name of the data.table as a length one character vector.
+#' @param column_names Names of the data.table to be converted as a character vector.
+#' @param base Base of the URIs to be minted in \code{uriref},
+#' @param paths Further path of URI to be minted in \code{uriref}.
+#' @param type Type of nquads statements: \code{'uri'} or \code{'literal'}.
+#' @param datatypes Character vector containing the datatype of literals. May include language statements.
+#' @examples
+#' the_data = data.table(refs = c('a', 'b', 'c'), ltrl = c(1, 2, 3))
+#' convert(df = "the_data", column_names = "ltrl", type = 'literal', datatypes = 'xsd:int')
+#' convert(df = "the_data", column_names = "refs", type = 'uri', base = 'https://www.example.org/', paths = 'data/')
+#' print(the_data)
 convert = function(df, column_names, base, paths,
     type = c("uri", "literal"), datatypes = "xsd:string"){
 
     type = match.arg(type)
+    # check df = character
 
     if (type == "uri"){
         string_to_eval = paste0(df, "[, ", column_names, ":= uriref(", 
