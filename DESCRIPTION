@@ -1,0 +1,18 @@
+Package: cower
+Title: What the Package Does (one line, title case)
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Auke", "Rijpma", role = c("aut", "cre"), email = "auke.rijpma@gmail.com"),
+    person("Rinke", "Hoekstra", role = c("ctb")),
+    person("Kathrin", "Dentler", role = c("ctb"))
+    )
+Description: What the package does (one paragraph).
+Depends: R (>= 3.2.3)
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/rijpma/cower
+Imports: 
+    git2r (>= 0.18.0),
+    uuid (>= 0.1-2)
+RoxygenNote: 6.0.1
