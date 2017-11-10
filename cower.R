@@ -93,7 +93,7 @@ uriref(c('one', 'two'), base = c('http:/example.org/', 'http://that.com/'))
 # column:PKTYPE csvw:valueUrl <http://data.socialhistory.org/resource/hsn/code/PKTYPE/_PKTYPE_> provgraph .
 
 
-x = data.table::fread(paste0("zcat < ", path_to_csv), colClasses = "character")
+# x = data.table::fread(paste0("zcat < ", path_to_csv), colClasses = "character")
 x = data.table::fread(path_to_csv, colClasses = "character")
 
 
@@ -248,7 +248,7 @@ outfile = gzfile("~/repos/cower/test.nq.gz", 'a')
 write.table(predicates[complete.cases(pred, obj), list(subj, pred, obj, graph)], 
     file = outfile, sep = ' ', quote = F, col.names = F, row.names = F)
 close(outfile)
-
+ 
 outfile = "~/desktop/test.nq")
 write.table(x[complete.cases(pred, obj), list(subj, pred, obj, graph)][sample(.N, 1e5), ], 
     file = outfile, sep = ' ', quote = F, col.names = F, row.names = F)
