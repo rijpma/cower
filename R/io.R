@@ -1,4 +1,4 @@
 # io.R
-nqwrite(dat, nquadpath, append = F){
+nqwrite = function(dat, nquadpath, append = F){
     # write or append nquads as gzfile
 }

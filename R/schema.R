@@ -1,15 +1,15 @@
 # schema.R
-build_schema_list(csvpath){
+build_schema_list = function(csvpath){
     # create schema list from dat
     return(schemalist)
 }
 
-schema_json(schema_list){
+schema_json = function(schema_list){
     # make json file from schema list
     write(json)
 }
 
-read_json_schema(jsonpath){
+read_json_schema =function(jsonpath){
     # json in, metadata list out
     schema_list = jsonlite::fromJSON(jsonpath)
     # tests go here?
@@ -40,7 +40,7 @@ expand_prefixes = function(schema_list){
     return(schema_list)
 }
 
-split_schema_uris(schema_list){
+split_schema_uris = function(schema_list){
     # splits uri patterns into a uri part and the values that need to be drawn from columns
     # also recognise when base uri needs to be overwritten
 }
