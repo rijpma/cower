@@ -11,7 +11,10 @@ schema_json(schema_list){
 
 read_json_schema(jsonpath){
     # json in, metadata list out
-    return(schemalist)
+    schema_list = jsonlite::fromJSON(jsonpath)
+    # tests go here?
+
+    return(schema_list)
 }
 
 expand_prefixes(schema_list){
