@@ -17,27 +17,25 @@ read_json_schema =function(jsonpath){
     return(schema_list)
 }
 
-expand_prefixes = function(schema_list){
-    # take schema_list and expend prefixes in tableSchema based on namespaces
-    
-    # add xsd: if no prefix in datatype
-    datatypes = schema_list$tableSchema$columns$datatype
-    schema_list$tableSchema$columns$datatype = ifelse(grepl(":", datatypes), 
-        datatypes, paste0("xsd:", datatypes))
+get_namespaces = function(schema_list){
+    namespaces = unlist(schema_list$`@context`[[3]]) # pos 3 fixed?
+    names(namespaces) = paste0(names(namespaces), ":")
+    return(namespaces)
+}
 
-    namespaces = unlist(schema_list$`@context`[[3]]) # is this always in position 3?
-    for (i in 1:length(namespaces)){
-        namespace_pattern = paste0("^", names(namespaces[i]), ":")
-
-        for (j in 1:ncol(schema_list$tableSchema$columns)){
-            schema_list$tableSchema$columns[, j] = gsub(pattern = namespace_pattern, 
-                replacement = namespaces[i], 
-                x = schema_list$tableSchema$columns[, j])
-        }        
+expand_prefixes = function(schema_list, context){
+    # also expands context part. 
+    # data.frame becomes matrix.
+    # Problem?
+    if (!is(schema_list, "list")){
+        # print(schema_list)
+        return(sapply(schema_list, 
+            function(x) stringi::stri_replace_all_fixed(x, 
+                names(context), 
+                context,
+            vectorize_all = F)))
     }
-    # also aboutUrl and elsewhere in schema_list. 
-
-    return(schema_list)
+    lapply(schema_list, expand_prefixes, context) 
 }
 
 split_schema_uris = function(schema_list){
