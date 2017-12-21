@@ -10,7 +10,7 @@
 #' literal("example", datatype="@@en")
 #' literal(630.6, datatype="xsd:float")
 #' literal(NA, datatype="xsd:integer")
-literal = function(string, datatype = "xsd:string"){
+literal = function(string, datatype = "xsd:string", ...){
     if(grepl("^@", datatype)){
         ifelse(is.na(string), NA, paste0('"', string, '"', datatype))
     } else {
@@ -29,7 +29,7 @@ literal = function(string, datatype = "xsd:string"){
 #' @param path Further path of URI
 #' @examples
 #' uriref('rainy', base = 'http://www.weather.com/', path = 'weather/')
-uriref = function(string, base, path = ''){
+uriref = function(string, base, path = '', ...){
     to_replace = "[ %+&]"
 
     ifelse(is.na(string), NA, 
@@ -66,18 +66,17 @@ bnode = function(n = 1){
 #' convert(df = "the_data", column_names = "refs", type = 'uri', base = 'https://www.example.org/', paths = 'data/')
 #' print(the_data)
 convert = function(df, column_names, base, paths,
-    type = c("uri", "literal"), datatypes = "xsd:string"){
+    type = "", datatype = ""){
 
-    type = match.arg(type)
+    # type = match.arg(type)
     # check df = character
-
-    if (type == "uri"){
-        string_to_eval = paste0(df, "[, ", column_names, ":= uriref(", 
-            column_names, ", base = '", base, "', path = '", paths, "')]")
-     } else if (type == "literal"){
-        string_to_eval = paste0(df, "[, ", column_names, ":= literal(", 
-            column_names, ", datatype = '", datatypes, "')]")
-    }
+    
+        string_to_eval = paste0(df, "[, ", column_names, ":= ", type, "(", 
+            column_names, ", ",
+            "base = '", base, "', ",
+            "path = '", paths, "', ",
+            "datatype = '", datatype,
+            "')]")
 
     eval(parse(text = string_to_eval), envir = parent.frame(2))
 }
