@@ -94,13 +94,14 @@
     "dc:description": "Rank"
    }, 
    {
-    "datatype": "string", 
     "titles": [
      "Country"
     ], 
     "@id": "https://iisg.amsterdam/resource/test.csv/column/Country", 
     "name": "Country", 
-    "dc:description": "Country"
+    "dc:description": "Country",
+    "propertyUrl": "clioind:country",
+    "valueUrl": "clioctr:{Country}"
    }, 
    {
     "datatype": "string", 
