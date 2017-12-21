@@ -4,6 +4,8 @@ build_schema_list = function(csvpath,
     base = "https://iisg.amsterdam/resource/", 
     dataset_name = ""){
 
+    dat = data.table::fread(csvpath, nrows = 100)
+
     schlist = list()
 
     schlist$dialect = list()
@@ -45,13 +47,13 @@ build_schema_list = function(csvpath,
     schlist$`tableSchema` = list()
     schlist$`tableSchema`$aboutUrl
     schlist$`tableSchema`$primaryKey
-    schlist$`tableSchema`$columns = x = data.frame(
-        "datatype" = c(1),
-        "titles" = c(1),
-        "@id" = c(1), # not accepted
-        "name" = c(1),
-        "dc:description" = c(1))
-    # create schema list from dat
+    schlist$`tableSchema`$columns = data.frame(
+        sapply(dat, class), # should be xsd classes
+        colnames(dat),
+        paste0(schlist$`@id`, "/", colnames(dat)),
+        colnames(dat),
+        colnames(dat))
+    names(schlist$`tableSchema`$columns) = c("datatype", "titles", "@id", "name", "dc:description")
 
     return(schlist)
 }
