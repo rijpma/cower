@@ -45,8 +45,8 @@ build_schema_list = function(csvpath,
     schlist$`dc:modified`$`@value` = format(Sys.time(), "%Y-%m-%d")
 
     schlist$`tableSchema` = list()
-    schlist$`tableSchema`$aboutUrl
-    schlist$`tableSchema`$primaryKey
+    schlist$`tableSchema`$aboutUrl = "{_row}"
+    schlist$`tableSchema`$primaryKey = colnames(dat)[1]
     schlist$`tableSchema`$columns = data.frame(
         sapply(dat, class), # should be xsd classes
         colnames(dat),
@@ -54,7 +54,7 @@ build_schema_list = function(csvpath,
         colnames(dat),
         colnames(dat))
     names(schlist$`tableSchema`$columns) = c("datatype", "titles", "@id", "name", "dc:description")
-
+    rownames(schlist$`tableSchema`$columns) = NULL
     return(schlist)
 }
 
