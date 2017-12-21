@@ -16,5 +16,6 @@ Imports:
     git2r (>= 0.18.0),
     uuid (>= 0.1-2),
     jsonlite (>= 1.5),
-    stringi (>= 1.1.5)
+    stringi (>= 1.1.5),
+    yaml (>= 2.1.16)
 RoxygenNote: 6.0.1

@@ -1,7 +1,59 @@
 # schema.R
-build_schema_list = function(csvpath){
+build_schema_list = function(csvpath,
+    delimiter = ",", encoding = "UTF-8", 
+    base = "https://iisg.amsterdam/resource/", 
+    dataset_name = ""){
+
+    schlist = list()
+
+    schlist$dialect = list()
+
+    schlist$dialect$quoteChar = "\"" # take input from fread
+    schlist$dialect$delimiter = delimiter # take input from fread
+    schlist$dialect$encoding = encoding # necessary with fread? needs close look
+
+    schlist$`dcat:keyword` = list()
+
+    schlist$`dc:license` = "http://opendefinition.org/licenses/cc-by/"
+
+    schlist$`dc:publisher` = list()
+    schlist$`dc:publisher`$`schema:name` = "CLARIAH Structured Data Hub - Datalegend"
+
+    schlist$`dc:publisher`$`schema:url` = list()
+    schlist$`dc:publisher`$`schema:url`$`schema:url`$`@id` = "http://datalegend.org"
+
+    schlist$`url` = basename(csvpath)
+
+    schlist$`@context` = list()
+    schlist$`@context`[[1]] = "http://csvw.clariah-sdh.eculture.labs.vu.nl/csvw.json"
+    schlist$`@context`[[2]] = list("@base" = base, "@language" = "en")
+    schlist$`@context`[[3]] = yaml::read_yaml("https://raw.githubusercontent.com/CLARIAH/COW/master/cow/converter/util/namespaces.yaml")
+    # not sure if this is where COW gets the list
+
+    if (dataset_name == ""){
+        schlist$`dc:title` = basename(csvpath)
+    } else {
+        schlist$`dc:title` = dataset_name
+    }
+
+    # need to ensure that base ends in /
+    schlist$`@id` = paste0(base, basename(csvpath)) 
+
+    schlist$`dc:modified` = list()
+    schlist$`dc:modified`$`@value` = format(Sys.time(), "%Y-%m-%d")
+
+    schlist$`tableSchema` = list()
+    schlist$`tableSchema`$aboutUrl
+    schlist$`tableSchema`$primaryKey
+    schlist$`tableSchema`$columns = x = data.frame(
+        "datatype" = c(1),
+        "titles" = c(1),
+        "@id" = c(1), # not accepted
+        "name" = c(1),
+        "dc:description" = c(1))
     # create schema list from dat
-    return(schemalist)
+
+    return(schlist)
 }
 
 schema_json = function(schema_list){
