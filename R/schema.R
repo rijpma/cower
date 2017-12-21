@@ -58,9 +58,10 @@ build_schema_list = function(csvpath,
     return(schlist)
 }
 
-schema_json = function(schema_list){
-    # make json file from schema list
-    write(json)
+schema_json = function(schema_list, jsonpath){
+    schema_as_json = jsonlite::toJSON(schema_list,
+        pretty = TRUE, auto_unbox = TRUE)
+    writeLines(schema_as_json, jsonpath)
 }
 
 read_json_schema =function(jsonpath){
