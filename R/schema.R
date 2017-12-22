@@ -124,3 +124,37 @@ split_schema_uris = function(schema_list){
     schema_list$tableSchema$columns = table_schema
     return(schema_list)
 }
+
+
+add_schema_evals = function(schema_list){
+
+    table_schema = schema_list$tableSchema$columns
+
+    if (!is.null(table_schema$valueUrl)){ # anyUrl?
+        table_schema$type = ifelse(is.na(table_schema$valueUrl), "literal", "uriref")
+    } else {
+        table_schema$type = "literal"
+    }    
+    if (!is.null(table_schema$aboutUrl)){ # anyUrl?
+        table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl), ".I", table_schema$aboutUrl)
+    } else {
+        table_schema$aboutUrl_eval = ".I"
+    }
+
+    table_schema$valueUrl_eval = 
+        ifelse(table_schema$type == "literal", 
+            table_schema$titles, 
+            table_schema$valueUrl_eval)
+    table_schema$propertyUrl_eval = 
+        ifelse(is.na(table_schema$propertyUrl_eval), 
+            table_schema$titles, 
+            table_schema$propertyUrl_eval)
+
+    schema_list$tableSchema$columns = table_schema
+
+    return(schema_list)
+}
+
+add_abouturl = function(schema_list){
+
+}
