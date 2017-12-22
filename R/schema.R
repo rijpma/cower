@@ -93,7 +93,18 @@ expand_prefixes = function(schema_list, context){
     lapply(schema_list, expand_prefixes, context) 
 }
 
+add_xsd = function(schema_list){
+    datatypes = schema_list$`tableSchema`$columns$datatype
+    datatypes = ifelse(stringi::stri_detect_fixed(datatypes, ":"), 
+            datatypes, paste0("xsd:", datatypes))
+
+    schema_list$`tableSchema`$columns$datatype = datatypes
+
+    return(schema_list)
+}
+
 split_schema_uris = function(schema_list){
+
     # splits uri patterns into a uri part and the values that need to be drawn from columns
     # also recognise when base uri needs to be overwritten
 }
