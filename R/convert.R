@@ -65,18 +65,27 @@ bnode = function(n = 1){
 #' convert(df = "the_data", column_names = "ltrl", type = 'literal', datatypes = 'xsd:int')
 #' convert(df = "the_data", column_names = "refs", type = 'uri', base = 'https://www.example.org/', paths = 'data/')
 #' print(the_data)
-convert = function(df, column_names, base, paths,
+convert = function(df, schema_list, 
     type = "", datatype = ""){
 
     # type = match.arg(type)
     # check df = character
-    
-        string_to_eval = paste0(df, "[, ", column_names, ":= ", type, "(", 
-            column_names, ", ",
-            "base = '", base, "', ",
-            "path = '", paths, "', ",
-            "datatype = '", datatype,
-            "')]")
+
+    table_schema = schema_list$tableSchema$columns
+    base = schema_list$`@context`[[2]]$`@base`
+
+    if (!is.null(table_schema$valueUrl)){
+        table_schema$type = ifelse(is.na(table_schema$valueUrl), "literal", "uriref")
+    } else {
+        table_schema$type = "literal"
+    }
+
+    string_to_eval = paste0(df, "[, ", table_schema$titles, 
+        ":= ", table_schema$type, "(", 
+        table_schema$titles, ", ",
+        "base = '", base, "', ",
+        "datatype = '", table_schema$datatype,
+        "')]")
 
     eval(parse(text = string_to_eval), envir = parent.frame(2))
 }
