@@ -82,3 +82,8 @@ convert = function(df, schema_list,
 
     eval(parse(text = string_to_eval), envir = parent.frame(2))
 }
+
+colnames_to_predicates = function(schema_list){
+    predicates = uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`)
+    return(predicates)
+}
