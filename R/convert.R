@@ -68,19 +68,10 @@ bnode = function(n = 1){
 convert = function(df, schema_list, 
     type = "", datatype = ""){
 
+    table_schema = schema_list$tableSchema$columns
+
     # type = match.arg(type)
     # check df = character
-
-    table_schema = schema_list$tableSchema$columns
-    base = schema_list$`@context`[[2]]$`@base`
-
-    if (!is.null(table_schema$valueUrl)){ # anyUrl?
-        table_schema$type = ifelse(is.na(table_schema$valueUrl), "literal", "uriref")
-    } else {
-        table_schema$type = "literal"
-    }
-
-    table_schema$valueUrl_eval = ifelse(table_schema$type == "literal", table_schema$titles, table_schema$valueUrl_eval)
 
     string_to_eval = paste0(df, "[, ", table_schema$titles, 
         ":= ", table_schema$type, "(", 
