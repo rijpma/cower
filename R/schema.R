@@ -138,7 +138,7 @@ add_schema_evals = function(schema_list){
     if (!is.null(table_schema$aboutUrl)){ # anyUrl?
         table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl), ".I", table_schema$aboutUrl)
     } else {
-        table_schema$aboutUrl_eval = ".I"
+        table_schema$aboutUrl_eval = schema_list$tableSchema$aboutUrl
     }
 
     table_schema$valueUrl_eval = 
