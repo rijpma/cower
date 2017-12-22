@@ -105,6 +105,22 @@ add_xsd = function(schema_list){
 
 split_schema_uris = function(schema_list){
 
-    # splits uri patterns into a uri part and the values that need to be drawn from columns
-    # also recognise when base uri needs to be overwritten
+    table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)
+    urlcolumns = colnames(table_schema)[grep("Url$", colnames(table_schema))]
+    # urlcolumns = "valueUrl"
+
+    table_schema[, paste0(urlcolumns, "_base")] = 
+        lapply(table_schema[, urlcolumns, drop = F], 
+            function(x) unlist(tstrsplit(x, "\\{{1,2}", keep = 1)))
+    table_schema[, paste0(urlcolumns, "_eval")] = 
+        lapply(table_schema[, urlcolumns, drop = F], 
+            stri_extract_first_regex, "\\{{1,2}.*\\}")
+    # tstrsplit only usable here because keep cannot be two if there's nothing to split in column
+
+    table_schema[, paste0(urlcolumns, "_eval")] = 
+        lapply(table_schema[, paste0(urlcolumns, "_eval"), drop = F], 
+        stri_replace_all_fixed, c("{", "}"), "", vectorize_all = F)
+
+    schema_list$tableSchema$columns = table_schema
+    return(schema_list)
 }
