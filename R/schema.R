@@ -140,6 +140,7 @@ add_schema_evals = function(schema_list){
     } else {
         table_schema$aboutUrl_eval = schema_list$tableSchema$aboutUrl
     }
+    table_schema$aboutUrl_eval[table_schema$aboutUrl_eval == "{_row}"] = ".I"
 
     table_schema$valueUrl_eval = 
         ifelse(table_schema$type == "literal", 
@@ -154,6 +155,7 @@ add_schema_evals = function(schema_list){
 
     return(schema_list)
 }
+
 
 add_abouturl = function(schema_list){
 
