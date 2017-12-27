@@ -157,6 +157,21 @@ add_schema_evals = function(schema_list){
     return(schema_list)
 }
 
+fix_null_titles = function(schema_list){
+    # [] on titles reads as list in df and becomes NULL, 
+    # replace with temp colname
+
+    table_schema = schema_list$tableSchema$columns
+
+    table_schema$titles[sapply(table_schema$titles, is.null)] = 
+        paste0("V", 1:sum(!is.null(table_schema$titles)))
+
+    table_schema$titles = unlist(table_schema$titles)
+
+    schema_list$tableSchema$columns = table_schema
+
+    return(schema_list)
+}
 
 add_abouturl = function(schema_list){
 
