@@ -134,11 +134,12 @@ add_schema_evals = function(schema_list){
         table_schema$type = ifelse(is.na(table_schema$valueUrl), "literal", "uriref")
     } else {
         table_schema$type = "literal"
-    }    
+    }
+
     if (!is.null(table_schema$aboutUrl)){ # anyUrl?
-        table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl), ".I", table_schema$aboutUrl)
+        table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl_eval), ".I", table_schema$aboutUrl_eval)
     } else {
-        table_schema$aboutUrl_eval = schema_list$tableSchema$aboutUrl
+        table_schema$aboutUrl_eval = schema_list$tableSchema$aboutUrl_eval
     }
     table_schema$aboutUrl_eval[table_schema$aboutUrl_eval == "{_row}"] = ".I"
 
