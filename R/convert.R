@@ -83,6 +83,33 @@ convert = function(df, schema_list,
     eval(parse(text = string_to_eval), envir = parent.frame(2))
 }
 
+subjects = function(df_long, schema_list){
+
+    # check if ncol(df_long == 2)
+
+    table_schema = schema_list$tableSchema$columns
+
+    x = eval(parse(text = paste0(
+        df_long, "[, list(N = .N), by = list(pred = pred)]"
+        )),
+        envir = parent.frame(2))
+
+    N = x$N
+    predicates = x$pred
+    # only predicates needed
+
+    string_to_eval = paste0(
+        "uriref(", df_long, "[pred == '",
+            predicates, "', ",
+            table_schema$aboutUrl_eval,
+            "], base = '", schema_list$`@context`[[2]]$`@base`, "')")
+    # fix base in schema prep, getting messy
+    string_to_eval = paste0(string_to_eval, collapse = ", ")
+    string_to_eval = paste0("c(", string_to_eval, ")")
+    eval(parse(text = string_to_eval),
+        envir = parent.frame(2))
+}
+
 colnames_to_predicates = function(schema_list){
     predicates = uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`)
     return(predicates)
