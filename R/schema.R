@@ -148,9 +148,9 @@ add_schema_evals = function(schema_list){
             table_schema$titles, 
             table_schema$valueUrl_eval)
     table_schema$propertyUrl_eval = 
-        ifelse(is.na(table_schema$propertyUrl_eval), 
+        ifelse(is.na(table_schema$propertyUrl), 
             table_schema$titles, 
-            table_schema$propertyUrl_eval)
+            table_schema$propertyUrl)
 
     schema_list$tableSchema$columns = table_schema
 
