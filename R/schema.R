@@ -173,6 +173,23 @@ fix_null_titles = function(schema_list){
     return(schema_list)
 }
 
+add_subject_base = function(schema_list){
+    table_schema = schema_list$tableSchema$columns
+
+    if (is.null(table_schema$aboutUrl_base)){
+        table_schema$aboutUrl_base = schema_list$`@context`[[2]]$`@base`
+    } else {
+        table_schema$aboutUrl_base = ifelse(is.na(table_schema$aboutUrl_base), 
+            schema_list$`@context`[[2]]$`@base`,
+            table_schema$aboutUrl_base)
+    }
+
+    schema_list$tableSchema$columns = table_schema
+
+    return(schema_list)
+
+}
+
 add_abouturl = function(schema_list){
 
 }
