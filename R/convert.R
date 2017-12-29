@@ -69,15 +69,22 @@ convert = function(df, schema_list,
     type = "", datatype = ""){
 
     table_schema = schema_list$tableSchema$columns
+    table_schema = table_schema[order(table_schema$virtual), ]
 
     # type = match.arg(type)
     # check df = character
 
-    string_to_eval = paste0(df, "[, ", table_schema$titles, 
-        ":= ", table_schema$type, "(", 
-        table_schema$valueUrl_eval, ", ",
-        "base = '", table_schema$valueUrl_base, "', ",
-        "datatype = '", table_schema$datatype,
+    x = rbind(table_schema[, c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval")],
+          setNames(table_schema[, c("titles", "type", "datatype", "valueUrl_base", "valueUrl_eval")],
+            c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval")))
+    x$type[1:nrow(table_schema)] = "uriref"
+    x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
+
+    string_to_eval = paste0(df, "[, ", x$titles, 
+        ":= ", x$type, "(", 
+        x$aboutUrl_eval, ", ",
+        "base = '", x$aboutUrl_base, "', ",
+        "datatype = '", x$datatype,
         "')]")
 
     eval(parse(text = string_to_eval), envir = parent.frame(2))
@@ -111,6 +118,7 @@ subjects = function(df_long, schema_list){
 }
 
 colnames_to_predicates = function(schema_list){
-    predicates = uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`)
-    return(predicates)
+    ifelse(is.na(schema_list$tableSchema$columns$propertyUrl),
+        uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`),
+        paste0("<", schema_list$tableSchema$columns$propertyUrl, ">"))
 }
