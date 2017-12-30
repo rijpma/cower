@@ -68,7 +68,7 @@ bnode = function(n = 1){
 convert = function(df, schema_list, 
     type = "", datatype = ""){
 
-    table_schema = schema_list$tableSchema$columns
+    table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
     table_schema = table_schema[order(table_schema$virtual), ]
 
     # type = match.arg(type)
