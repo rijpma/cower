@@ -105,6 +105,10 @@ add_xsd = function(table_schema){
 split_schema_uris = function(table_schema){
     urlcolumns = colnames(table_schema)[grep("Url$", colnames(table_schema))]
     # urlcolumns = "valueUrl"
+    
+    if (length(urlcolumns) == 0){
+        return(table_schema)
+    }
 
     table_schema[, paste0(urlcolumns, "_base")] = 
         lapply(table_schema[, urlcolumns, drop = F], 
