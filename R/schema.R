@@ -93,19 +93,16 @@ expand_prefixes = function(schema_list, context){
     lapply(schema_list, expand_prefixes, context) 
 }
 
-add_xsd = function(schema_list){
-    datatypes = schema_list$`tableSchema`$columns$datatype
-    datatypes = ifelse(stringi::stri_detect_fixed(datatypes, ":"), 
-            datatypes, paste0("xsd:", datatypes))
+add_xsd = function(table_schema){
+    table_schema$datatype = ifelse(
+        stringi::stri_detect_fixed(table_schema$datatype, ":"), 
+            table_schema$datatype, 
+            paste0("http://www.w3.org/2001/XMLSchema#", table_schema$datatype))
 
-    schema_list$`tableSchema`$columns$datatype = datatypes
-
-    return(schema_list)
+    return(table_schema)
 }
 
-split_schema_uris = function(schema_list){
-
-    table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)
+split_schema_uris = function(table_schema){
     urlcolumns = colnames(table_schema)[grep("Url$", colnames(table_schema))]
     # urlcolumns = "valueUrl"
 
@@ -121,15 +118,11 @@ split_schema_uris = function(schema_list){
         lapply(table_schema[, paste0(urlcolumns, "_eval"), drop = F], 
         stri_replace_all_fixed, c("{", "}"), "", vectorize_all = F)
 
-    schema_list$tableSchema$columns = table_schema
-    return(schema_list)
+    return(table_schema)
 }
 
 
-add_schema_evals = function(schema_list){
-
-    table_schema = schema_list$tableSchema$columns
-
+add_schema_evals = function(table_schema){
     if (!is.null(table_schema$valueUrl)){ # anyUrl?
         table_schema$type = ifelse(is.na(table_schema$valueUrl), "literal", "uriref")
     } else {
@@ -152,30 +145,22 @@ add_schema_evals = function(schema_list){
             table_schema$titles, 
             table_schema$propertyUrl)
 
-    schema_list$tableSchema$columns = table_schema
-
-    return(schema_list)
+    return(table_schema)
 }
 
-fix_null_titles = function(schema_list){
+fix_null_titles = function(table_schema){
     # [] on titles reads as list in df and becomes NULL, 
     # replace with temp colname
-
-    table_schema = schema_list$tableSchema$columns
 
     table_schema$titles[sapply(table_schema$titles, is.null)] = 
         paste0("V", 1:sum(!is.null(table_schema$titles)))
 
     table_schema$titles = unlist(table_schema$titles)
 
-    schema_list$tableSchema$columns = table_schema
-
-    return(schema_list)
+    return(table_schema)
 }
 
-add_subject_base = function(schema_list){
-    table_schema = schema_list$tableSchema$columns
-
+add_subject_base = function(table_schema){
     if (is.null(table_schema$aboutUrl_base)){
         table_schema$aboutUrl_base = schema_list$`@context`[[2]]$`@base`
     } else {
@@ -184,10 +169,18 @@ add_subject_base = function(schema_list){
             table_schema$aboutUrl_base)
     }
 
-    schema_list$tableSchema$columns = table_schema
+    return(table_schema)
+}
 
-    return(schema_list)
+prep_table_schema = function(table_schema){
+    table_schema = as.data.frame(table_schema, stringsAsFactors = FALSE)
+    table_schema = fix_null_titles(table_schema = table_schema)
+    table_schema = add_xsd(table_schema)
+    table_schema = split_schema_uris(table_schema)
+    table_schema = add_subject_base(table_schema)
+    table_schema = add_schema_evals(table_schema)
 
+    return(table_schema)
 }
 
 add_abouturl = function(schema_list){
