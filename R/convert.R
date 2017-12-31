@@ -91,7 +91,11 @@ convert = function(df, schema_list,
 }
 
 colnames_to_predicates = function(schema_list){
+    if (! "propertyUrl" %in% colnames(schema_list$tableSchema$columns)){
+        uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`)
+    } else {
     ifelse(is.na(schema_list$tableSchema$columns$propertyUrl),
         uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`),
         paste0("<", schema_list$tableSchema$columns$propertyUrl, ">"))
+    }
 }
