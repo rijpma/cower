@@ -48,7 +48,7 @@ build_schema_list = function(csvpath,
     schlist$`tableSchema`$aboutUrl = "{_row}"
     schlist$`tableSchema`$primaryKey = colnames(dat)[1]
     schlist$`tableSchema`$columns = data.frame(
-        sapply(dat, class), # should be xsd classes
+        xsd_from_datatypes(sapply(dat, class)), # should be xsd classes
         colnames(dat),
         paste0(schlist$`@id`, "/", colnames(dat)),
         colnames(dat),
@@ -198,6 +198,11 @@ prep_table_schema = function(schema_list){
     return(schema_list)
 }
 
-add_abouturl = function(schema_list){
+xsd_from_datatypes = function(datatypes){
+    dct = c("character" = "string",
+        "numeric" = "float",
+        "double" = "float",
+        "logical" = "boolean")
 
+    return(dct[datatypes])
 }
