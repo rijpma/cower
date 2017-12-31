@@ -105,7 +105,7 @@ add_xsd = function(table_schema){
 split_schema_uris = function(table_schema){
     urlcolumns = colnames(table_schema)[grep("Url$", colnames(table_schema))]
     # urlcolumns = "valueUrl"
-    
+
     if (length(urlcolumns) == 0){
         return(table_schema)
     }
@@ -133,21 +133,30 @@ add_schema_evals = function(table_schema){
         table_schema$type = "literal"
     }
 
-    if (!is.null(table_schema$aboutUrl)){ # anyUrl?
+    # if (!is.null(table_schema$aboutUrl)){ # anyUrl?
+    if ("aboutUrl" %in% names(table_schema)){ # anyUrl?
         table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl_eval), ".I", table_schema$aboutUrl_eval)
     } else {
-        table_schema$aboutUrl_eval = schema_list$tableSchema$aboutUrl_eval
+        table_schema$aboutUrl_eval = ".I"
     }
     table_schema$aboutUrl_eval[table_schema$aboutUrl_eval == "{_row}"] = ".I"
 
+    if ("propertyUrl" %in% names(table_schema)){
+        ifelse(is.na(table_schema$propertyUrl), 
+            table_schema$titles, 
+            table_schema$propertyUrl)
+    } else {
+        table_schema$propertyUrl_eval = table_schema$titles
+    }
+    
     table_schema$valueUrl_eval = 
         ifelse(table_schema$type == "literal", 
             table_schema$titles, 
             table_schema$valueUrl_eval)
-    table_schema$propertyUrl_eval = 
-        ifelse(is.na(table_schema$propertyUrl), 
-            table_schema$titles, 
-            table_schema$propertyUrl)
+    # table_schema$propertyUrl_eval = 
+    #     ifelse(is.na(table_schema$propertyUrl), 
+    #         table_schema$titles, 
+    #         table_schema$propertyUrl)
 
     return(table_schema)
 }
