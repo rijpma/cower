@@ -127,27 +127,27 @@ split_schema_uris = function(table_schema){
 
 
 add_schema_evals = function(table_schema){
-    if (!is.null(table_schema$valueUrl)){ # anyUrl?
+    if (! "valueUrl_base" %in% names(table_schema)) table_schema$valueUrl_base = NA
+    if (! "aboutUrl_base" %in% names(table_schema)) table_schema$aboutUrl_base = NA
+    if (! "propertyUrl_base" %in% names(table_schema)) table_schema$propertyUrl_base = NA
+    if (! "valueUrl_eval" %in% names(table_schema)) table_schema$valueUrl_eval = NA
+    if (! "aboutUrl_eval" %in% names(table_schema)) table_schema$aboutUrl_eval = NA
+    if (! "propertyUrl_eval" %in% names(table_schema)) table_schema$propertyUrl_eval = NA
+
+
+    if ("valueUrl" %in% names(table_schema)){ # anyUrl?
         table_schema$type = ifelse(is.na(table_schema$valueUrl), "literal", "uriref")
     } else {
         table_schema$type = "literal"
     }
 
-    # if (!is.null(table_schema$aboutUrl)){ # anyUrl?
-    if ("aboutUrl" %in% names(table_schema)){ # anyUrl?
-        table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl_eval), ".I", table_schema$aboutUrl_eval)
-    } else {
-        table_schema$aboutUrl_eval = ".I"
-    }
+    table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl_eval), ".I", table_schema$aboutUrl_eval)
+
     table_schema$aboutUrl_eval[table_schema$aboutUrl_eval == "{_row}"] = ".I"
 
-    if ("propertyUrl" %in% names(table_schema)){
-        ifelse(is.na(table_schema$propertyUrl), 
-            table_schema$titles, 
-            table_schema$propertyUrl)
-    } else {
-        table_schema$propertyUrl_eval = table_schema$titles
-    }
+    table_schema$propertyUrl_eval = ifelse(is.na(table_schema$propertyUrl_eval), 
+        table_schema$titles, 
+        table_schema$propertyUrl_eval)
 
     table_schema$valueUrl_eval = 
         ifelse(table_schema$type == "literal", 
