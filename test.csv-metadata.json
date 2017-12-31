@@ -111,6 +111,12 @@
     "@id": "https://iisg.amsterdam/resource/test.csv/column/Int", 
     "name": "Int", 
     "dc:description": "Int"
+   },
+   {
+    "virtual": true,
+    "aboutUrl": "clioind:country/{Country}",
+    "propertyUrl": "skos:exactMatch",
+    "valueUrl": "sdmx-dimension:{Country}"
    }
   ]
  }

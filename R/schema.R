@@ -148,7 +148,7 @@ add_schema_evals = function(table_schema){
     } else {
         table_schema$propertyUrl_eval = table_schema$titles
     }
-    
+
     table_schema$valueUrl_eval = 
         ifelse(table_schema$type == "literal", 
             table_schema$titles, 
@@ -173,27 +173,29 @@ fix_null_titles = function(table_schema){
     return(table_schema)
 }
 
-add_subject_base = function(table_schema){
+add_subject_base = function(table_schema, base){
     if (is.null(table_schema$aboutUrl_base)){
-        table_schema$aboutUrl_base = schema_list$`@context`[[2]]$`@base`
+        table_schema$aboutUrl_base = base
     } else {
         table_schema$aboutUrl_base = ifelse(is.na(table_schema$aboutUrl_base), 
-            schema_list$`@context`[[2]]$`@base`,
+            base,
             table_schema$aboutUrl_base)
     }
 
     return(table_schema)
 }
 
-prep_table_schema = function(table_schema){
-    table_schema = as.data.frame(table_schema, stringsAsFactors = FALSE)
+prep_table_schema = function(schema_list){
+    table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
+
     table_schema = fix_null_titles(table_schema = table_schema)
     table_schema = add_xsd(table_schema)
     table_schema = split_schema_uris(table_schema)
-    table_schema = add_subject_base(table_schema)
+    table_schema = add_subject_base(table_schema, base = schema_list$`@context`[[2]]$`@base`)
     table_schema = add_schema_evals(table_schema)
 
-    return(table_schema)
+    schema_list$tableSchema$columns = table_schema
+    return(schema_list)
 }
 
 add_abouturl = function(schema_list){
