@@ -162,8 +162,19 @@ add_schema_evals = function(table_schema){
     return(table_schema)
 }
 
+fix_missing_virtuals = function(table_schema){
+    if (! "virtual" %in% colnames(table_schema)){
+        table_schema$virtual = FALSE
+    }
+    table_schema$virtual = ifelse(is.na(table_schema$virtual),
+        FALSE, table_schema$virtual)
+
+    return(table_schema)
+
+}
+
 fix_null_titles = function(table_schema){
-    # [] on titles reads as list in df and becomes NULL, 
+    # [] on titles reads as list in df and becomes NULL,
     # replace with temp colname
 
     table_schema$titles[sapply(table_schema$titles, is.null)] = 
@@ -189,6 +200,7 @@ add_subject_base = function(table_schema, base){
 prep_table_schema = function(schema_list){
     table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
 
+    table_schema = fix_missing_virtuals(table_schema = table_schema)
     table_schema = fix_null_titles(table_schema = table_schema)
     table_schema = add_xsd(table_schema)
     table_schema = split_schema_uris(table_schema)
