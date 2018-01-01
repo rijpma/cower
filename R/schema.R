@@ -4,7 +4,7 @@ build_schema_list = function(csvpath,
     base = "https://iisg.amsterdam/resource/", 
     dataset_name = ""){
 
-    dat = data.table::fread(csvpath, nrows = 100, colClasses = "character")
+    dat = data.table::fread(csvpath, nrows = 100)
 
     schlist = list()
 
@@ -55,6 +55,7 @@ build_schema_list = function(csvpath,
         colnames(dat), stringsAsFactors = FALSE)
     names(schlist$`tableSchema`$columns) = c("datatype", "titles", "@id", "name", "dc:description")
     rownames(schlist$`tableSchema`$columns) = NULL
+
     return(schlist)
 }
 
