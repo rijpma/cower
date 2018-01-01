@@ -173,14 +173,35 @@ fix_missing_virtuals = function(table_schema){
 
 }
 
-fix_null_titles = function(table_schema){
+fix_empty_titles = function(table_schema){
     # [] on titles reads as list in df and becomes NULL,
-    # replace with temp colname
 
-    table_schema$titles[sapply(table_schema$titles, is.null)] = 
-        paste0("V", 1:sum(!is.null(table_schema$titles)))
+    if (any(table_schema$virtual == FALSE & 
+        (sapply(table_schema$titles, is.null) |
+        is.na(table_schema$titles) | 
+        table_schema$titles == ""))){
+            warning("Non-virtual column missing title, creating random column name")
+    }
+
+    table_schema$titles = ifelse(sapply(table_schema$titles, is.null),
+        make.unique(
+            stringi::stri_rand_strings(
+                n = sum(sapply(table_schema$titles, is.null)),
+                length = 10,
+                pattern = "[a-z]"),
+            sep = '_'),
+        table_schema$titles)
 
     table_schema$titles = unlist(table_schema$titles)
+
+    table_schema$titles = ifelse(is.na(table_schema$titles) | table_schema$titles == "",
+        make.unique(
+            stringi::stri_rand_strings(
+                n = sum(is.na(table_schema$titles) | table_schema$titles == ""),
+                length = 10,
+                pattern = "[a-z]"),
+            sep = '_'),
+        table_schema$titles)
 
     return(table_schema)
 }
@@ -201,7 +222,7 @@ prep_table_schema = function(schema_list){
     table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
 
     table_schema = fix_missing_virtuals(table_schema = table_schema)
-    table_schema = fix_null_titles(table_schema = table_schema)
+    table_schema = fix_empty_titles(table_schema = table_schema)
     table_schema = add_xsd(table_schema)
     table_schema = split_schema_uris(table_schema)
     table_schema = add_subject_base(table_schema, base = schema_list$`@context`[[2]]$`@base`)
