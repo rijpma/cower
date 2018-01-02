@@ -100,3 +100,18 @@ colnames_to_predicates = function(schema_list){
         paste0("<", schema_list$tableSchema$columns$propertyUrl, ">"))
     }
 }
+
+triples = function(df, schema_list){
+    if (!is(df, "data.table")){
+        stop("data is not a data table")
+    }
+
+    data.table::melt(df,
+        measure.vars = list(
+            as.character(schema_list$tableSchema$columns[, 'titles']),
+            paste0(schema_list$tableSchema$columns[, 'titles'], "_sub")),
+        id.vars = 'graph',
+        variable.name = "pred",
+        value.name = c("obj", "sub"),
+        variable.factor = FALSE)
+}
