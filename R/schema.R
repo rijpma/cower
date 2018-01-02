@@ -116,12 +116,12 @@ split_schema_uris = function(table_schema){
             function(x) unlist(tstrsplit(x, "\\{{1,2}", keep = 1)))
     table_schema[, paste0(urlcolumns, "_eval")] = 
         lapply(table_schema[, urlcolumns, drop = F], 
-            stri_extract_first_regex, "\\{{1,2}.*\\}")
+            stringi::stri_extract_first_regex, "\\{{1,2}.*\\}")
     # tstrsplit only usable here because keep cannot be two if there's nothing to split in column
 
     table_schema[, paste0(urlcolumns, "_eval")] = 
         lapply(table_schema[, paste0(urlcolumns, "_eval"), drop = F], 
-        stri_replace_all_fixed, c("{", "}"), "", vectorize_all = F)
+        stringi::stri_replace_all_fixed, c("{", "}"), "", vectorize_all = F)
 
     return(table_schema)
 }
