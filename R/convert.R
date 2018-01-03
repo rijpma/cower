@@ -81,8 +81,8 @@ convert = function(df, schema_list,
     x$type[1:nrow(table_schema)] = "uriref"
     x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
 
-    string_to_eval = paste0(df, "[, ", x$titles, 
-        ":= ", x$type, "(", 
+    string_to_eval = paste0(df, "[, `", x$titles, 
+        "` := ", x$type, "(", 
         x$aboutUrl_eval, ", ",
         "base = '", x$aboutUrl_base, "', ",
         "datatype = '", x$datatype,
