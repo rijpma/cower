@@ -65,15 +65,14 @@ bnode = function(n = 1){
 #' convert(df = "the_data", column_names = "ltrl", type = 'literal', datatypes = 'xsd:int')
 #' convert(df = "the_data", column_names = "refs", type = 'uri', base = 'https://www.example.org/', paths = 'data/')
 #' print(the_data)
-convert = function(df, schema_list, 
+convert = function(dat, schema_list, 
     type = "", datatype = ""){
+
+    dat = deparse(substitute(dat))
 
     table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
     table_schema = table_schema[order(table_schema$virtual, decreasing = TRUE), ]
     # virtual is character here, but order still works
-
-    # type = match.arg(type)
-    # check df = character
 
     x = rbind(table_schema[, c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval")],
           setNames(table_schema[, c("titles", "type", "datatype", "valueUrl_base", "valueUrl_eval")],
@@ -81,14 +80,14 @@ convert = function(df, schema_list,
     x$type[1:nrow(table_schema)] = "uriref"
     x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
 
-    string_to_eval = paste0(df, "[, `", x$titles, 
+    string_to_eval = paste0(dat, "[, `", x$titles, 
         "` := ", x$type, "(", 
         x$aboutUrl_eval, ", ",
         "base = '", x$aboutUrl_base, "', ",
         "datatype = '", x$datatype,
         "')]")
 
-    eval(parse(text = string_to_eval), envir = parent.frame(2))
+    eval(parse(text = string_to_eval), envir = parent.frame(1))
 }
 
 colnames_to_predicates = function(schema_list){
