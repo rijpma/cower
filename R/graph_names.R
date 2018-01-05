@@ -16,7 +16,7 @@
 #' close(outfile)
 #' graph_names(path)
 graph_names = function(path_to_csv, 
-    base = "https://iisg.amsterdam/resource/hsn/", 
+    base = "", 
     sub_path = ""){
 
     now = format(Sys.time(), "%Y-%m-%dT%H:%M")
