@@ -1,4 +1,5 @@
 # schema.R
+#' @import data.table
 build_schema_list = function(csvpath,
     delimiter = ",", encoding = "UTF-8", 
     base = "https://iisg.amsterdam/resource/", 
@@ -16,13 +17,14 @@ build_schema_list = function(csvpath,
 
     schlist$`dcat:keyword` = list()
 
-    schlist$`dc:license` = "http://opendefinition.org/licenses/cc-by/"
+    schlist$`dc:license` = list()
+    schlist$`dc:license`$`@id` = "http://opendefinition.org/licenses/cc-by/"
 
     schlist$`dc:publisher` = list()
     schlist$`dc:publisher`$`schema:name` = "CLARIAH Structured Data Hub - Datalegend"
 
     schlist$`dc:publisher`$`schema:url` = list()
-    schlist$`dc:publisher`$`schema:url`$`schema:url`$`@id` = "http://datalegend.org"
+    schlist$`dc:publisher`$`schema:url`$`@id` = "http://datalegend.org"
 
     schlist$`url` = basename(csvpath)
 
@@ -234,6 +236,7 @@ prep_table_schema = function(schema_list){
 
 xsd_from_datatypes = function(datatypes){
     dct = c("character" = "string",
+        "integer" = "integer",
         "numeric" = "float",
         "double" = "float",
         "logical" = "boolean")
