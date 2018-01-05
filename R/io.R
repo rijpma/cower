@@ -3,7 +3,7 @@ nqwrite = function(dat, nquadpath,
     append = FALSE, compress = TRUE){
 
     if (compress & stringi::stri_sub(nquadpath, -3, -1) != ".gz"){
-        warning(paste("File", nquadpath, "does not end in .gz"))
+        warning(paste("compress == ", compress, "and file", nquadpath, "does not end in .gz"))
     }
 
     if (append & !file.exists(nquadpath)){
