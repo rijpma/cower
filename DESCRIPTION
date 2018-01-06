@@ -19,5 +19,7 @@ Imports:
     jsonlite (>= 1.5),
     stringi (>= 1.1.5),
     yaml (>= 2.1.16),
-    jsonld (>= 1.2)
+    jsonld (>= 1.2),
+    urltools (>= 1.6.0),
+    data.table (>= 1.10.0)
 RoxygenNote: 6.0.1
