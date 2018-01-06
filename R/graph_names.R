@@ -15,16 +15,15 @@
 #' write.csv(data.frame(a = c(1, 2, 3)), file = outfile)
 #' close(outfile)
 #' graph_names(path)
-graph_names = function(path_to_csv, 
-    base = "", 
-    sub_path = ""){
+graph_names = function(filehash, 
+    base = ""){
 
     now = format(Sys.time(), "%Y-%m-%dT%H:%M")
     graphs = c('assertion', 'nanopublication', 'provenance', 'pubinfo', 'resource')
 
     # better: use uriref
-    nanopub = paste0("<", base, sub_path, graphs, "/", 
-         githash(path_to_csv)['short'], "/", now, ">")
+    nanopub = paste0("<", base, graphs, "/", 
+         filehash, "/", now, ">")
 
     names(nanopub) = graphs
 
