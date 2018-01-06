@@ -1,19 +1,21 @@
-metagraph = function(schema_list){
+metagraph = function(schema_list, graph_names){
     # overall, pubinfo, nanopublication graphs
     # and then
     nquads = jsonld::jsonld_to_rdf(toJSON(schema_list, auto_unbox = TRUE))
-    blanknodes = unique(unlist(stringi::stri_extract_all_regex(nquads, "_:b[0-9]+")))
+    blanknodes = unique(
+        unlist(
+            stringi::stri_extract_all_regex(nquads, "_:b[0-9]+")
+        )
+    )
     nquads = stringi::stri_replace_all_regex(nquads, blanknodes, bnode(length(blanknodes)), vectorize_all = F)
-    nquads = stringi::stri_replace_all_regex(nquads, ".\n", "graphnamegoeshere .\n")
+    nquads = stringi::stri_replace_all_regex(nquads, ".\n", paste0(graph_names["provenance"], " .\n"))
 
     return(nquads)
 }
 
 #' @import data.table
-nanopublication = function(schema_list, csv_path, namespaces){
-    gn = graph_names(csv_path, base = schema_list$`@context`[[2]]$`@base`)
+nanopublication = function(schema_list, graph_names, namespaces, hashes){
     now = format(Sys.time(), "%Y-%m-%dT%H:%M")
-    hashes = githash(csv_path)
 
     bgraph = urn(n = 1)
     
@@ -29,28 +31,28 @@ nanopublication = function(schema_list, csv_path, namespaces){
             ## nanopub
             ### the nanopublication
             data.table(
-                sub = gn['nanopublication'] ,
+                sub = graph_names['nanopublication'] ,
                 pred = c(uriref("type", namespaces['rdf:']), uriref("hashasAssertion", namespaces["np:"])),
-                obj = c(uriref("Nanopublication", namespaces["np:"]), gn['assertion'])
+                obj = c(uriref("Nanopublication", namespaces["np:"]), graph_names['assertion'])
             ),
             data.table(
-                sub = gn['assertion'],
+                sub = graph_names['assertion'],
                 pred = c(uriref("type", namespaces["rdf:"]), uriref("hasProvenance", namespaces["np:"])),
-                obj = c(uriref("assertion", namespaces["np:"]), gn['provenance'])
+                obj = c(uriref("assertion", namespaces["np:"]), graph_names['provenance'])
             ),
             data.table(
-                sub = gn['provenance'],
+                sub = graph_names['provenance'],
                 pred = uriref("type", namespaces["rdf:"]),
                 obj = uriref("Provenance", namespaces["np:"])
             ),
             # link to publication info graph
             data.table(
-                sub = gn['assertion'],
+                sub = graph_names['assertion'],
                 pred = uriref("hasPublicationInfo", namespaces["np:"]),
-                obj = gn['pubinfo']
+                obj = graph_names['pubinfo']
             ),
             data.table(
-                sub = gn['pubinfo'],
+                sub = graph_names['pubinfo'],
                 pred = uriref("type", namespaces["rdf:"]),
                 obj = uriref("PublicationInfo", namespaces["np:"])
             )
@@ -63,19 +65,21 @@ nanopublication = function(schema_list, csv_path, namespaces){
     ### Provenance information for the assertion graph (the data structure definition itself)
     provenance = data.table::rbindlist(
         list(
-            list(gn['assertion'], uriref("wasDerivedFrom", namespaces["prov:"]), uriref(hashes['full'], namespaces['sdr:'])),
-            list(gn['assertion'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = 'xsd:dateTime'))
+            list(graph_names['assertion'], uriref("wasDerivedFrom", namespaces["prov:"]), uriref(hashes['full'], namespaces['sdr:'])),
+            list(graph_names['assertion'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = 'xsd:dateTime'))
         )
     )
 
+    provenance[, graph := graph_names['provenance']]
+    
     # pubinfo graph
     pubinfo = data.table::rbindlist(
         list(
-            list(gn['nanopublication'], uriref("wasGeneratedBy", namespaces["prov:"]), uriref("", base = "http://github.com/rijpma/cower")),
-            list(gn['nanopublication'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = 'xsd:dateTime'))
+            list(graph_names['nanopublication'], uriref("wasGeneratedBy", namespaces["prov:"]), uriref("", base = "http://github.com/rijpma/cower")),
+            list(graph_names['nanopublication'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = 'xsd:dateTime'))
         )
     )
-    pubinfo[, graph := gn['pubinfo']]
+    pubinfo[, graph := graph_names['pubinfo']]
 
     out = data.table::rbindlist(
         list(
