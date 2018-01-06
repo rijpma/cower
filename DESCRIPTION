@@ -18,5 +18,6 @@ Imports:
     uuid (>= 0.1-2),
     jsonlite (>= 1.5),
     stringi (>= 1.1.5),
-    yaml (>= 2.1.16)
+    yaml (>= 2.1.16),
+    jsonld (>= 1.2)
 RoxygenNote: 6.0.1
