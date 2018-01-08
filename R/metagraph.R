@@ -1,7 +1,7 @@
 metagraph = function(schema_list, graph_names){
     # overall, pubinfo, nanopublication graphs
     # and then
-    nquads = jsonld::jsonld_to_rdf(toJSON(schema_list, auto_unbox = TRUE))
+    nquads = jsonld::jsonld_to_rdf(jsonlite::toJSON(schema_list, auto_unbox = TRUE))
     blanknodes = unique(
         unlist(
             stringi::stri_extract_all_regex(nquads, "_:b[0-9]+")
@@ -71,7 +71,7 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
     )
 
     provenance[, graph := graph_names['provenance']]
-    
+
     # pubinfo graph
     pubinfo = data.table::rbindlist(
         list(
