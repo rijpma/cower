@@ -88,8 +88,8 @@ expand_prefixes = function(schema_list, context){
     if (!is(schema_list, "list")){
         # print(schema_list)
         return(sapply(schema_list, 
-            function(x) stringi::stri_replace_all_fixed(x, 
-                names(context), 
+            function(x) stringi::stri_replace_all_regex(x, 
+                stringi::stri_join("^", names(context)), 
                 context,
             vectorize_all = F)))
     }
