@@ -41,15 +41,9 @@ bnode = function(n = 1){
     replicate(n, paste0("_:N", gsub("-", "", uuid::UUIDgenerate())))
      # N in nq serialisation to make NCName compliant-ish
 }
-
-# todo: have uris and triples in one go? have multiple bases possible and have one = recyle
 # merge paths into base?
 # make paths optional 
-# make it possible to combine
 # support column names and types into named list?
-# check for character-type df?
-# support non-character df?
-# default column names = all
 
 #' Efficiently convert selected columns of \code{data.table} to 
 #' nquad statements
@@ -94,9 +88,9 @@ colnames_to_predicates = function(schema_list){
     if (! "propertyUrl" %in% colnames(schema_list$tableSchema$columns)){
         uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`)
     } else {
-    ifelse(is.na(schema_list$tableSchema$columns$propertyUrl),
-        uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`),
-        paste0("<", schema_list$tableSchema$columns$propertyUrl, ">"))
+        ifelse(is.na(schema_list$tableSchema$columns$propertyUrl),
+            uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`),
+            paste0("<", schema_list$tableSchema$columns$propertyUrl, ">"))
     }
 }
 
