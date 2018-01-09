@@ -28,6 +28,7 @@ cower = function(csv_path, json_path, nquad_path,
     writeLines(text = mg, con = outfile)
     close(outfile)
 
+    schema_list = fix_abouturl(schema_list)
     schema_list = prep_table_schema(schema_list = schema_list)
     schema_list = expand_prefixes(schema_list, namespaces)
     schema_list$tableSchema$columns = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)

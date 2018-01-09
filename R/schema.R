@@ -96,13 +96,34 @@ expand_prefixes = function(schema_list, context){
     lapply(schema_list, expand_prefixes, context) 
 }
 
-add_xsd = function(table_schema){
+add_namespaces = function(table_schema, base){
     table_schema$datatype = ifelse(
         stringi::stri_detect_fixed(table_schema$datatype, ":"), 
             table_schema$datatype, 
             paste0("http://www.w3.org/2001/XMLSchema#", table_schema$datatype))
 
+    urlcolumns = colnames(table_schema)[grep("Url$", colnames(table_schema))]
+    table_schema[, urlcolumns] = lapply(table_schema[, urlcolumns, drop = F], 
+        function(x) {
+            ifelse(
+                stringi::stri_detect_fixed(x, ":"), x, paste0(base, x)
+            )
+        }
+    )
+
     return(table_schema)
+}
+
+fix_abouturl = function(schema_list){
+    schema_list$tableSchema$aboutUrl = ifelse(
+        stringi::stri_detect_fixed(
+            schema_list$tableSchema$aboutUrl, 
+            ":"
+        ),
+    schema_list$tableSchema$aboutUrl,
+    paste0(schema_list$`@context`[[2]]$`@base`, schema_list$tableSchema$aboutUrl)
+    )
+    return(schema_list)
 }
 
 split_schema_uris = function(table_schema){
@@ -118,7 +139,7 @@ split_schema_uris = function(table_schema){
             function(x) unlist(tstrsplit(x, "\\{{1,2}", keep = 1)))
     table_schema[, paste0(urlcolumns, "_eval")] = 
         lapply(table_schema[, urlcolumns, drop = F], 
-            stringi::stri_extract_first_regex, "\\{{1,2}.*\\}")
+            stringi::stri_extract_first_regex, "\\{{1,2}.*\\}{1,2}")
     # tstrsplit only usable here because keep cannot be two if there's nothing to split in column
 
     table_schema[, paste0(urlcolumns, "_eval")] = 
@@ -129,7 +150,7 @@ split_schema_uris = function(table_schema){
 }
 
 
-add_schema_evals = function(table_schema){
+add_schema_evals = function(table_schema, global_aboutUrl){
     if (! "valueUrl_base" %in% names(table_schema)) table_schema$valueUrl_base = NA
     if (! "aboutUrl_base" %in% names(table_schema)) table_schema$aboutUrl_base = NA
     if (! "propertyUrl_base" %in% names(table_schema)) table_schema$propertyUrl_base = NA
@@ -144,9 +165,13 @@ add_schema_evals = function(table_schema){
         table_schema$type = "literal"
     }
 
-    table_schema$aboutUrl_eval = ifelse(is.na(table_schema$aboutUrl_eval), ".I", table_schema$aboutUrl_eval)
-
-    table_schema$aboutUrl_eval[table_schema$aboutUrl_eval == "{_row}"] = ".I"
+    # table_schema$aboutUrl_eval[table_schema$aboutUrl_eval == "{_row}"] = global_aboutUrl
+    table_schema[, grep("_eval$", names(table_schema))] = 
+        lapply(
+            table_schema[, grep("_eval$", names(table_schema)), drop = F],
+            stringi::stri_replace_all_regex, "\\{{1,2}_row\\}{1,2}|^_row$", 
+            ".I"
+        )
 
     table_schema$propertyUrl_eval = ifelse(is.na(table_schema$propertyUrl_eval), 
         table_schema$titles, 
@@ -220,12 +245,19 @@ add_subject_base = function(table_schema, base){
     return(table_schema)
 }
 
+insert_abouturl = function(table_schema, global_abouturl){
+    table_schema$aboutUrl = ifelse(is.na(table_schema$aboutUrl), global_abouturl, table_schema$aboutUrl)
+    return(table_schema)
+}
+
 prep_table_schema = function(schema_list){
+
     table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
 
     table_schema = fix_missing_virtuals(table_schema = table_schema)
     table_schema = fix_empty_titles(table_schema = table_schema)
-    table_schema = add_xsd(table_schema)
+    table_schema = add_namespaces(table_schema, base = schema_list$`@context`[[2]]$`@base`)
+    table_schema = insert_abouturl(table_schema, global_abouturl = schema_list$tableSchema$aboutUrl)
     table_schema = split_schema_uris(table_schema)
     table_schema = add_subject_base(table_schema, base = schema_list$`@context`[[2]]$`@base`)
     table_schema = add_schema_evals(table_schema)
