@@ -1,8 +1,8 @@
 cower = function(csv_path, json_path, nquad_path, 
-    compress = TRUE){
+    compress = TRUE, nrows = -1L){
 
     schema_list = read_json_schema(json_path)
-    dat = data.table::fread(csv_path)
+    dat = data.table::fread(csv_path, nrows = nrows)
     namespaces = get_namespaces(schema_list) # get_namespaces does not function on expanded schema_list
     filehash = githash(csv_path)
 
@@ -36,7 +36,7 @@ cower = function(csv_path, json_path, nquad_path,
     convert(dat = dat, 
         schema_list = schema_list)
     
-    dat[, graph := graph_names(csv_path, base = schema_list$`@context`[[2]]$`@base`)["assertion"]]
+    dat[, graph := named_graphs['assertion']]
     
     dat = triples(dat, schema_list)
     
