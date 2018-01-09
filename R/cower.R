@@ -1,3 +1,17 @@
+#' Convert a csv file to nquads using json-ld data description.
+#' @param csv_path The path to the csv file.
+#' @param json_path The path to the json-ld data description. 
+#' Use \code{\link{build_schema_list}} and \code{\link{schema_json}} to make one or use COW.
+#' @param nquad_path Destination path for nquads. \code{cower} will
+#' give a warning if the extension does not match the \code{compress} option.
+#' @param compress. Should cower output be a compressed (gz) file.
+#' Defaults to \code{TRUE} as nquad files can be very large relative
+#' to the original file (x10, roughly).
+#' @param batch_size Batch size for conversion. Default is \code{-1L},
+#' all rows at once. For large csv-files that take up considerable memory
+#' to convert, setting this to a lower number will preserve memory.
+#' @param max_size Set this parameter to an integer to only convert 
+#' part of the dataset. Useful for testing.
 #' @export
 cower = function(csv_path, json_path, nquad_path, 
     compress = TRUE, batch_size = -1L, max_size = FALSE){
