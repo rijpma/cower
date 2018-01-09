@@ -1,3 +1,4 @@
+#' Create a basic json-ld metadata from a csv dataset.
 #' @import data.table
 #' @export
 build_schema_list = function(csvpath,
@@ -61,6 +62,7 @@ build_schema_list = function(csvpath,
     return(schlist)
 }
 
+#' Write basic json-ld metadata to file.
 #' @export
 write_schema_json = function(schema_list, jsonpath){
     schema_as_json = jsonlite::toJSON(schema_list,
