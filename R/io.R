@@ -19,7 +19,8 @@ nqwrite = function(dat, nquadpath,
     }
 
     write.table(dat[complete.cases(pred, obj), list(sub, pred, obj, graph)], 
-        file = outfile, sep = ' ', quote = F, col.names = F, row.names = F)
+        file = outfile, sep = ' ', quote = F, 
+        col.names = F, row.names = F, eol = " .\n")
 
     close(outfile)
 }
