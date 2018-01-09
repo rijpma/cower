@@ -47,7 +47,7 @@ cower = function(csv_path, json_path, nquad_path,
     schema_list = expand_prefixes(schema_list, namespaces)
     schema_list$tableSchema$columns = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)
 
-    if (max_size) csv_path = paste0("head -", max_size, " ", csv_path)
+    if (max_size) csv_path = paste0("head -", format(max_size, scientific = FALSE), " ", csv_path)
     done = 0
     current_batch_size = batch_size
     header = data.table::fread(csv_path, header = TRUE, nrow = 1)
