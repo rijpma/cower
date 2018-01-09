@@ -1,5 +1,5 @@
 cower = function(csv_path, json_path, nquad_path, 
-    compress = TRUE, batch_size = -1L){
+    compress = TRUE, batch_size = -1L, max_size = FALSE){
 
     schema_list = read_json_schema(json_path)
     namespaces = get_namespaces(schema_list) # get_namespaces does not function on expanded schema_list
@@ -32,6 +32,7 @@ cower = function(csv_path, json_path, nquad_path,
     schema_list = expand_prefixes(schema_list, namespaces)
     schema_list$tableSchema$columns = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)
 
+    if (max_size) csv_path = paste0("head -", max_size, " ", csv_path)
     done = 0
     current_batch_size = batch_size
     header = data.table::fread(csv_path, header = TRUE, nrow = 1)
