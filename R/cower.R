@@ -1,3 +1,4 @@
+#' @export
 cower = function(csv_path, json_path, nquad_path, 
     compress = TRUE, batch_size = -1L, max_size = FALSE){
 
