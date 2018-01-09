@@ -1,6 +1,6 @@
 Package: cower
 Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: c(
     person("Auke", "Rijpma", role = c("aut", "cre"), email = "auke.rijpma@gmail.com"),
     person("Rinke", "Hoekstra", role = c("ctb")),
