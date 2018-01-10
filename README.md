@@ -4,6 +4,6 @@ R-implementation of [COW](https://github.com/CLARIAH/COW) to convert csv files t
 
 ## Installation.
 ```
-install.packages("devtools")
+library("devtools")
 devtools::install_github("rijpma/cower")
 ```
