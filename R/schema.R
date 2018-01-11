@@ -177,7 +177,12 @@ add_subject_base = function(table_schema, base){
 }
 
 insert_abouturl = function(table_schema, global_abouturl){
-    table_schema$aboutUrl = ifelse(is.na(table_schema$aboutUrl), global_abouturl, table_schema$aboutUrl)
+    if (is.null(table_schema$aboutUrl)){
+        table_schema$aboutUrl = global_abouturl
+    } else {
+        table_schema$aboutUrl = ifelse(is.na(table_schema$aboutUrl), global_abouturl, table_schema$aboutUrl)
+    }
+    
     return(table_schema)
 }
 
