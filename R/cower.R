@@ -54,7 +54,8 @@ cower = function(csv_path, json_path, nquad_path,
     while (current_batch_size == batch_size){
         batch = data.table::fread(csv_path,
             nrows = batch_size, skip = done + 1,
-            header = FALSE)
+            header = FALSE,
+            sep = schema_list$dialect$delimiter)
         current_batch_size = nrow(batch)
 
         setnames(batch, names(batch), names(header))
