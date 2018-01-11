@@ -2,7 +2,7 @@
 #' @import data.table
 #' @export
 build_schema_list = function(csvpath,
-    delimiter = ",", encoding = "UTF-8", 
+    delimiter = "auto", encoding = "UTF-8", 
     base = "https://iisg.amsterdam/resource/", 
     dataset_name = ""){
 
@@ -13,7 +13,7 @@ build_schema_list = function(csvpath,
     schlist$dialect = list()
 
     schlist$dialect$quoteChar = "\"" # take input from fread
-    schlist$dialect$delimiter = delimiter # take input from fread
+    schlist$dialect$delimiter = delimiter
     schlist$dialect$encoding = encoding # necessary with fread? needs close look
 
     schlist$`dcat:keyword` = list()
