@@ -68,18 +68,45 @@ convert = function(dat, schema_list,
     table_schema = table_schema[order(table_schema$virtual, decreasing = TRUE), ]
     # virtual is character here, but order still works
 
-    x = rbind(table_schema[, c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval")],
-          setNames(table_schema[, c("titles", "type", "datatype", "valueUrl_base", "valueUrl_eval")],
-            c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval")))
+    x = rbind(table_schema[, c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")],
+          setNames(table_schema[, c("titles", "type", "datatype", "valueUrl_base", "valueUrl_eval", "null")],
+            c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")))
+    # fails when null not present
     x$type[1:nrow(table_schema)] = "uriref"
-    x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
+    x$newvar = x$titles
+    x$newvar[1:nrow(table_schema)] = paste0(x$newvar[1:nrow(table_schema)], "_sub")
+    # x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
 
-    string_to_eval = paste0(dat, "[, `", x$titles, 
-        "` := ", x$type, "(", 
-        x$aboutUrl_eval, ", ",
-        "base = '", x$aboutUrl_base, "', ",
-        "datatype = '", x$datatype,
-        "')]")
+    convertstring = paste0(
+        "`", x$newvar, "`",
+        " := ", 
+        x$type, "(", 
+            "string = ", x$aboutUrl_eval, ", ",
+            "base = '", x$aboutUrl_base, "', ",
+            "datatype = '", x$datatype,
+        "')"
+    )
+    nullstring = ifelse(x$null == "NULL", 
+        "",
+        paste0("!", x$titles, " %in% ", x$null)
+    )
+
+    string_to_eval = paste0(
+        dat, "[",
+            nullstring,
+            ", ",
+            convertstring,
+        "]"
+    )
+    # save time and risky %chin% behaviour by dropping if NULL?
+
+
+    # string_to_eval = paste0(dat, "[, `", x$titles, 
+    #     "` := ", x$type, "(", 
+    #     x$aboutUrl_eval, ", ",
+    #     "base = '", x$aboutUrl_base, "', ",
+    #     "datatype = '", x$datatype,
+    #     "')]")
 
     eval(parse(text = string_to_eval), envir = parent.frame(1))
 }
