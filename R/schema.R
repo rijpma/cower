@@ -176,6 +176,14 @@ add_subject_base = function(table_schema, base){
     return(table_schema)
 }
 
+insert_null = function(table_schema){
+    if (is.null(table_schema$null)){
+        table_schema$null = vector("list", nrow(table_schema))
+    }
+
+    return(table_schema)
+}
+
 insert_abouturl = function(table_schema, global_abouturl){
     if (is.null(table_schema$aboutUrl)){
         table_schema$aboutUrl = global_abouturl
@@ -193,6 +201,7 @@ prep_table_schema = function(schema_list){
     table_schema = fix_missing_virtuals(table_schema = table_schema)
     table_schema = fix_empty_titles(table_schema = table_schema)
     table_schema = add_namespaces(table_schema, base = schema_list$`@context`[[2]]$`@base`)
+    table_schema = insert_null(table_schema)
     table_schema = insert_abouturl(table_schema, global_abouturl = schema_list$tableSchema$aboutUrl)
     table_schema = split_schema_uris(table_schema)
     table_schema = add_subject_base(table_schema, base = schema_list$`@context`[[2]]$`@base`)
