@@ -30,7 +30,7 @@ graph_names = function(filehash,
     return(nanopub)
 }
 
-githash = function(path_to_csv){
-    filehash = git2r::hashfile(path_to_csv)
+hash_file = function(path_to_csv){
+    filehash = digest::digest(file = path_to_csv, algo = "md5")
     return(c(full = filehash, short = substring(filehash, 1, 8)))
 }

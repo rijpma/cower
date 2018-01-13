@@ -24,7 +24,7 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
             data.table(
                 sub = uriref(hashes['full'], namespaces['sdr:']), 
                 pred = c(uriref("path", namespaces['sdv:']), 
-                    uriref("sha1_hash", namespaces['sdv:'])), 
+                    uriref("md5_hash", namespaces['sdv:'])), 
                 obj = c(literal(path.expand("~/repos/cower/test.csv"), "xsd:string"),
                     literal(hashes['full'], "xsd:string"))
             ),

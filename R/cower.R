@@ -18,7 +18,7 @@ cower = function(csv_path, json_path, nquad_path,
 
     schema_list = read_json_schema(json_path)
     namespaces = get_namespaces(schema_list) # get_namespaces does not function on expanded schema_list
-    filehash = githash(csv_path)
+    filehash = hash_file(csv_path)
 
     named_graphs = graph_names(filehash['short'], base = schema_list$`@context`[[2]]$`@base`)
 
