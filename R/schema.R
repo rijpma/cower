@@ -73,49 +73,46 @@ split_schema_uris = function(table_schema){
             stringi::stri_extract_first_regex, "\\{{1,2}.*\\}{1,2}")
     # tstrsplit only usable here because keep cannot be two if there's nothing to split in column
 
-    table_schema[, paste0(urlcolumns, "_eval")] = 
-        lapply(table_schema[, paste0(urlcolumns, "_eval"), drop = F], 
-        stringi::stri_replace_all_fixed, c("{", "}"), "", vectorize_all = F)
-
     return(table_schema)
 }
 
 
 add_schema_evals = function(table_schema, global_aboutUrl){
+    # make sure all columns exist
     if (! "valueUrl_base" %in% names(table_schema)) table_schema$valueUrl_base = NA
     if (! "aboutUrl_base" %in% names(table_schema)) table_schema$aboutUrl_base = NA
     if (! "propertyUrl_base" %in% names(table_schema)) table_schema$propertyUrl_base = NA
     if (! "valueUrl_eval" %in% names(table_schema)) table_schema$valueUrl_eval = NA
     if (! "aboutUrl_eval" %in% names(table_schema)) table_schema$aboutUrl_eval = NA
     if (! "propertyUrl_eval" %in% names(table_schema)) table_schema$propertyUrl_eval = NA
+    if (! "csvw:value" %in% names(table_schema)) table_schema$`csvw:value` = NA
 
-
-    if ("valueUrl" %in% names(table_schema)){ # anyUrl?
+    # fill in type based on presence valueUrl
+    if ("valueUrl" %in% names(table_schema)){
         table_schema$type = ifelse(is.na(table_schema$valueUrl), "literal", "uriref")
     } else {
         table_schema$type = "literal"
     }
 
-    # table_schema$aboutUrl_eval[table_schema$aboutUrl_eval == "{_row}"] = global_aboutUrl
+    # replace eval by csvw:value if missing
+    table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval) & !is.na(table_schema$`csvw:value`), table_schema$`csvw:value`, table_schema$valueUrl_eval)
+    # replace eval by empty string if missing and not csvw:value and uriref
+    table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval) & table_schema$type == "uriref", "\"\"", table_schema$valueUrl_eval)
+    # use column title for eval if completely unspecified
+    table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval), table_schema$titles, table_schema$valueUrl_eval)
+
+    # replace {_row} with .I (why not stri_replace_last_fixed) ?
     table_schema[, grep("_eval$", names(table_schema))] = 
         lapply(
             table_schema[, grep("_eval$", names(table_schema)), drop = F],
-            stringi::stri_replace_all_regex, "\\{{1,2}_row\\}{1,2}|^_row$", 
+                stringi::stri_replace_all_regex, "\\{{1,2}_row\\}{1,2}|^_row$", 
             ".I"
         )
 
-    table_schema$propertyUrl_eval = ifelse(is.na(table_schema$propertyUrl_eval), 
-        table_schema$titles, 
-        table_schema$propertyUrl_eval)
-
-    table_schema$valueUrl_eval = 
-        ifelse(table_schema$type == "literal", 
-            table_schema$titles, 
-            table_schema$valueUrl_eval)
-    # table_schema$propertyUrl_eval = 
-    #     ifelse(is.na(table_schema$propertyUrl), 
-    #         table_schema$titles, 
-    #         table_schema$propertyUrl)
+    # strip parenthesis on remaining _eval bits
+    table_schema[, grep("_eval$", names(table_schema))] = 
+        lapply(table_schema[, grep("_eval$", names(table_schema)), drop = F], 
+            stringi::stri_replace_all_fixed, c("{", "}"), "", vectorize_all = F)
 
     return(table_schema)
 }
