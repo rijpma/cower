@@ -32,15 +32,20 @@ cower = function(csv_path, json_path, nquad_path,
         append = FALSE,
         compress = compress)
 
-    mg = metagraph(schema_list, named_graphs)
+    mg = metagraph(schema_list, graph_names = named_graphs)
+    
+    nqwrite(dat = mg, 
+        nquadpath = nquad_path, 
+        append = TRUE,
+        compress = compress)
 
-    if (compress) {
-        outfile = gzfile(nquad_path, open = "a")
-    } else {
-        outfile = file(nquad_path, open = "a")
-    }
-    writeLines(text = mg, con = outfile)
-    close(outfile)
+    # if (compress) {
+    #     outfile = gzfile(nquad_path, open = "a")
+    # } else {
+    #     outfile = file(nquad_path, open = "a")
+    # }
+    # writeLines(text = mg, con = outfile)
+    # close(outfile)
 
     schema_list = fix_abouturl(schema_list)
     schema_list = prep_table_schema(schema_list = schema_list)
