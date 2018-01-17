@@ -58,7 +58,7 @@ cower = function(csv_path, json_path, nquad_path,
             sep = schema_list$dialect$delimiter)
         current_batch_size = nrow(batch)
 
-        setnames(batch, names(batch), names(header))
+        data.table::setnames(batch, names(batch), names(header))
 
         convert(dat = batch,
             schema_list = schema_list)
