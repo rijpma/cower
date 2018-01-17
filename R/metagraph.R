@@ -25,8 +25,8 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
                 sub = uriref(hashes['full'], namespaces['sdr:']), 
                 pred = c(uriref("path", namespaces['sdv:']), 
                     uriref("md5_hash", namespaces['sdv:'])), 
-                obj = c(literal(path.expand("~/repos/cower/test.csv"), "xsd:string"),
-                    literal(hashes['full'], "xsd:string"))
+                obj = c(literal(path.expand("~/repos/cower/test.csv"), uriref("string", namespaces["xsd:"])),
+                    literal(hashes['full'], uriref("string", namespaces["xsd:"])))
             ),
             ## nanopub
             ### the nanopublication
@@ -66,7 +66,7 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
     provenance = data.table::rbindlist(
         list(
             list(graph_names['assertion'], uriref("wasDerivedFrom", namespaces["prov:"]), uriref(hashes['full'], namespaces['sdr:'])),
-            list(graph_names['assertion'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = 'xsd:dateTime'))
+            list(graph_names['assertion'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = uriref('dateTime', namespaces['xsd:'])))
         )
     )
 
@@ -76,7 +76,7 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
     pubinfo = data.table::rbindlist(
         list(
             list(graph_names['nanopublication'], uriref("wasGeneratedBy", namespaces["prov:"]), uriref("", base = "http://github.com/rijpma/cower")),
-            list(graph_names['nanopublication'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = 'xsd:dateTime'))
+            list(graph_names['nanopublication'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = uriref('dateTime', namespaces['xsd:'])))
         )
     )
     pubinfo[, graph := graph_names['pubinfo']]
