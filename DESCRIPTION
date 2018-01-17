@@ -7,13 +7,13 @@ Authors@R: c(
     person("Kathrin", "Dentler", role = c("ctb"))
     )
 Description: What the package does (one paragraph).
-Depends: 
+Depends:
     R (>= 3.2.3)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/rijpma/cower
-Imports: 
+Imports:
     digest (>= 0.6.12),
     uuid (>= 0.1-2),
     jsonlite (>= 1.5),
@@ -23,3 +23,4 @@ Imports:
     urltools (>= 1.6.0),
     data.table (>= 1.10.0)
 RoxygenNote: 6.0.1
+Suggests: testthat
