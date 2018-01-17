@@ -158,6 +158,18 @@ fix_empty_titles = function(table_schema){
             sep = '_'),
         table_schema$titles)
 
+    # separate column description where duplicates are allowed
+    # while keeping titles in place for correct predicate placement
+    table_schema$column = table_schema$titles
+    table_schema$titles = ifelse(duplicated(table_schema$titles, fromLast = TRUE),
+        make.unique(
+            stringi::stri_rand_strings(
+                n = sum(duplicated(table_schema$titles, fromLast = TRUE)),
+                length = 10,
+                pattern = "[a-z]"),
+            sep = '_'),
+        table_schema$titles)
+
     return(table_schema)
 }
 

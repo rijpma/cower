@@ -68,9 +68,9 @@ convert = function(dat, schema_list,
     table_schema = table_schema[order(table_schema$virtual, decreasing = TRUE), ]
     # virtual is character here, but order still works
 
-    x = rbind(table_schema[, c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")],
-          setNames(table_schema[, c("titles", "type", "datatype", "valueUrl_base", "valueUrl_eval", "null")],
-            c("titles", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")))
+    x = rbind(table_schema[, c("titles", "column", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")],
+          setNames(table_schema[, c("titles", "column", "type", "datatype", "valueUrl_base", "valueUrl_eval", "null")],
+            c("titles", "column", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")))
     # fails when null not present
     x$type[1:nrow(table_schema)] = "uriref"
     x$newvar = x$titles
@@ -88,7 +88,7 @@ convert = function(dat, schema_list,
     )
     nullstring = ifelse(x$null == "NULL", 
         "",
-        paste0("!", x$titles, " %in% ", x$null)
+        paste0("!", x$column, " %in% ", x$null)
     )
 
     string_to_eval = paste0(
