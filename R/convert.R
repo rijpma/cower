@@ -68,7 +68,7 @@ bnode = function(n = 1){
 #' convert(df = "the_data", column_names = "refs", type = 'uri', base = 'https://www.example.org/', paths = 'data/')
 #' print(the_data)
 convert = function(dat, schema_list, 
-    type = "", datatype = ""){
+    type = "", datatype = "", done_so_far = 0){
 
     dat = deparse(substitute(dat))
 
@@ -84,6 +84,8 @@ convert = function(dat, schema_list,
     x$newvar = x$titles
     x$newvar[1:nrow(table_schema)] = paste0(x$newvar[1:nrow(table_schema)], "_sub")
     # x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
+
+    x$aboutUrl_eval = stringi::stri_replace_all_fixed(x$aboutUrl_eval, ".I", stringi::stri_join("(.I + " , + done_so_far, ")"))
   
     convertstring = paste0(
         "`", x$newvar, "`",

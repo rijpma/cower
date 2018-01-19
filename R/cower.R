@@ -66,7 +66,8 @@ cower = function(csv_path, json_path, nquad_path,
         data.table::setnames(batch, names(batch), names(header))
 
         convert(dat = batch,
-            schema_list = schema_list)
+            schema_list = schema_list,
+            done_so_far = done)
 
         batch[, graph := named_graphs['assertion']]
 
@@ -80,6 +81,7 @@ cower = function(csv_path, json_path, nquad_path,
             compress = compress)
 
         done = done + current_batch_size
-        cat("Done ", done, "rows.\n")
+        cat("Converted", done, "rows.\n")
     }
+    cat("Done.")
 }
