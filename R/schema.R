@@ -99,7 +99,7 @@ add_schema_evals = function(table_schema, global_aboutUrl){
     # replace eval by empty string if missing and not csvw:value and uriref
     table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval) & table_schema$type == "uriref", "\"\"", table_schema$valueUrl_eval)
     # use column title for eval if completely unspecified
-    table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval), table_schema$titles, table_schema$valueUrl_eval)
+    table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval), table_schema$column, table_schema$valueUrl_eval)
 
     # replace {_row} with .I (why not stri_replace_last_fixed) ?
     table_schema[, grep("_eval$", names(table_schema))] = 
@@ -138,37 +138,11 @@ fix_empty_titles = function(table_schema){
             warning("Non-virtual column missing title, creating random column name")
     }
 
-    table_schema$titles = ifelse(sapply(table_schema$titles, is.null),
-        make.unique(
-            stringi::stri_rand_strings(
-                n = sum(sapply(table_schema$titles, is.null)),
-                length = 10,
-                pattern = "[a-z]"),
-            sep = '_'),
-        table_schema$titles)
-
-    table_schema$titles = unlist(table_schema$titles)
-
-    table_schema$titles = ifelse(is.na(table_schema$titles) | table_schema$titles == "",
-        make.unique(
-            stringi::stri_rand_strings(
-                n = sum(is.na(table_schema$titles) | table_schema$titles == ""),
-                length = 10,
-                pattern = "[a-z]"),
-            sep = '_'),
-        table_schema$titles)
-
     # separate column description where duplicates are allowed
     # while keeping titles in place for correct predicate placement
     table_schema$column = table_schema$titles
-    table_schema$titles = ifelse(duplicated(table_schema$titles, fromLast = TRUE),
-        make.unique(
-            stringi::stri_rand_strings(
-                n = sum(duplicated(table_schema$titles, fromLast = TRUE)),
-                length = 10,
-                pattern = "[a-z]"),
-            sep = '_'),
-        table_schema$titles)
+    table_schema$titles = stringi::stri_join("newcol", 1:nrow(table_schema), stringi::stri_rand_strings(n = nrow(table_schema), length = 10, pattern = '[a-z]'))
+    table_schema$titles = make.unique(table_schema$titles)
 
     return(table_schema)
 }
