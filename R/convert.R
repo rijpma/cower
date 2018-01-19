@@ -12,9 +12,17 @@
 #' literal(NA, datatype="xsd:integer")
 literal = function(string, datatype = "xsd:string", ...){
     if(grepl("^@", datatype)){
-        ifelse(is.na(string), NA, paste0('"', string, '"', datatype))
+        ifelse(
+            is.na(string),
+            NA,
+            paste0('"', clean_string(string), '"', datatype)
+        )
     } else {
-        ifelse(is.na(string), NA, paste0('"', string, '"^^', datatype))
+        ifelse(
+            is.na(string),
+            NA,
+            paste0('"', clean_string(string), '"^^', datatype)
+        )
     }
 }
 
@@ -76,7 +84,7 @@ convert = function(dat, schema_list,
     x$newvar = x$titles
     x$newvar[1:nrow(table_schema)] = paste0(x$newvar[1:nrow(table_schema)], "_sub")
     # x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
-
+  
     convertstring = paste0(
         "`", x$newvar, "`",
         " := ", 
