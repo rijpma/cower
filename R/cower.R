@@ -51,6 +51,7 @@ cower = function(csv_path, json_path, nquad_path,
     schema_list = prep_table_schema(schema_list = schema_list)
     schema_list = expand_prefixes(schema_list, namespaces)
     schema_list$tableSchema$columns = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)
+    schema_list = datatypes_as_urirefs(schema_list)
 
     if (max_size) csv_path = paste0("head -", format(max_size, scientific = FALSE), " ", csv_path)
     done = 0
