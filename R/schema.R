@@ -177,6 +177,14 @@ insert_abouturl = function(table_schema, global_abouturl){
     return(table_schema)
 }
 
+datatypes_as_urirefs = function(schema_list){
+    # done on schema_list because non-expanded prefixes might still exist
+    datatypes = schema_list$tableSchema$columns$datatype
+    datatypes = ifelse(grepl("^@", datatypes) | is.na(datatypes), datatypes, uriref(rep("", length(datatypes)), base = datatypes))
+    schema_list$tableSchema$columns$datatype = datatypes
+    return(schema_list)
+}
+
 prep_table_schema = function(schema_list){
 
     table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
