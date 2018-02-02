@@ -45,7 +45,7 @@ read_rdf = function(path_to_rdf, type = c("ntriples", "nquads")){
 
     if (type == "nquads"){
         dat[, graph := sapply(stringi::stri_extract_last_regex(obj, rdf_regex("uriref")), tail, 1)]
-        dat[, object := stringi::stri_replace_last_fixed(obj, graph, "")]
+        dat[, obj := stringi::stri_replace_last_fixed(obj, graph, "")]
     }
     return(dat[])
 }
