@@ -10,12 +10,19 @@
 #' literal("example", datatype="@@en")
 #' literal(630.6, datatype="xsd:float")
 #' literal(NA, datatype="xsd:integer")
-literal = function(string, datatype = "xsd:string", ...){
-    if(grepl("^@", datatype)){
+literal = function(string, datatype = "xsd:string", lang = NA, ...){
+    # prettier way of doing this? Get datatype and connector based on content datatype?
+    if (!is.na(lang)){
         ifelse(
             is.na(string),
             NA,
-            paste0('"', clean_string(string), '"', datatype)
+            paste0('"', clean_string(string), '"@', lang)
+        )
+    } else if (is.na(datatype)){
+        ifelse(
+            is.na(string),
+            NA,
+            paste0('"', clean_string(string), '"')
         )
     } else {
         ifelse(
@@ -86,6 +93,7 @@ convert = function(dat, schema_list,
     # x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
 
     x$aboutUrl_eval = stringi::stri_replace_all_fixed(x$aboutUrl_eval, ".I", stringi::stri_join("(.I + " , + done_so_far, ")"))
+
   
     convertstring = paste0(
         "`", x$newvar, "`",
@@ -93,13 +101,18 @@ convert = function(dat, schema_list,
         x$type, "(", 
             "string = ", x$aboutUrl_eval, ", ",
             "base = '", x$aboutUrl_base, "', ",
-            "datatype = '", x$datatype,
+            "datatype = '", x$datatype, # this quote needs to be fixed if you want to pass NA as NA
         "')"
     )
+    
+    # but for now this ugly solution
+    convertstring = stringi::stri_replace_all_fixed(convertstring, "'NA'", "NA")
+
     nullstring = ifelse(x$null == "NULL", 
         "",
         paste0("!", x$column, " %in% ", x$null)
     )
+
 
     string_to_eval = paste0(
         dat, "[",
