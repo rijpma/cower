@@ -96,13 +96,15 @@ convert = function(dat, schema_list,
 
   
     convertstring = paste0(
+        dat, "[,",
         "`", x$newvar, "`",
         " := ", 
         x$type, "(", 
             "string = ", x$aboutUrl_eval, ", ",
             "base = '", x$aboutUrl_base, "', ",
             "datatype = '", x$datatype, # this quote needs to be fixed if you want to pass NA as NA
-        "')"
+        "')",
+        "]"
     )
     
     # but for now this ugly solution
@@ -110,17 +112,16 @@ convert = function(dat, schema_list,
 
     nullstring = ifelse(x$null == "NULL", 
         "",
-        paste0("!", x$column, " %in% ", x$null)
+        paste0(
+            dat, "[",
+            x$column, " %in% ", x$null,
+            ", `", x$newvar, "`",
+            " := ", "NA",
+            "]"
+        )
     )
 
-
-    string_to_eval = paste0(
-        dat, "[",
-            nullstring,
-            ", ",
-            convertstring,
-        "]"
-    )
+    string_to_eval = c(convertstring, nullstring)
     # save time and risky %chin% behaviour by dropping if NULL?
 
 
