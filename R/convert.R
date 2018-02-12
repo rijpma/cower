@@ -139,7 +139,7 @@ colnames_to_predicates = function(schema_list){
         uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`)
     } else {
         ifelse(is.na(schema_list$tableSchema$columns$propertyUrl),
-            uriref(schema_list$tableSchema$columns$propertyUrl_eval, base = schema_list$`@context`[[2]]$`@base`),
+            uriref(schema_list$tableSchema$columns$column, base = schema_list$`@context`[[2]]$`@base`),
             paste0("<", schema_list$tableSchema$columns$propertyUrl, ">"))
     }
 }
