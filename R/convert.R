@@ -45,7 +45,7 @@ literal = function(string, datatype = "xsd:string", lang = NA, ...){
 #' @examples
 #' uriref('rainy', base = 'http://www.weather.com/', path = 'weather/')
 uriref = function(string, base, path = '', ...){
-    to_replace = "[ %+&]"
+    to_replace = "[ %+&{}]"
 
     ifelse(is.na(string), NA, 
     paste0("<", base, path, urltools::url_encode(gsub(to_replace, "_", string)), ">"))
