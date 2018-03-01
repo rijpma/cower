@@ -30,7 +30,7 @@ metagraph = function(schema_list, graph_names){
 }
 
 #' @import data.table
-nanopublication = function(schema_list, graph_names, namespaces, hashes){
+nanopublication = function(schema_list, graph_names, namespaces, hashes, metadatagraph){
 
     # needs https://github.com/CLARIAH/COW/blob/master/cow/converter/csvw.py
 
@@ -38,6 +38,9 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
 
     bgraph = urn(n = 1)
     
+    creators = metadatagraph[pred == "<http://purl.org/dc/terms/creator>", obj]
+    if (length(creators) == 0) creators = NA
+
     overall = data.table::rbindlist(
         list(
             data.table(
@@ -74,6 +77,11 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
                 sub = graph_names['pubinfo'],
                 pred = uriref("type", namespaces["rdf:"]),
                 obj = uriref("PublicationInfo", namespaces["np:"])
+            ),
+            data.table(
+                sub = graph_names['nanopublication'], 
+                pred = uriref('wasAttributedTo', base = namespaces['prov:']), 
+                obj = creators
             )
         )
     )
@@ -82,10 +90,35 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
 
     # provenance graph
     ### Provenance information for the assertion graph (the data structure definition itself)
+
+    # about/property/valueUrl derivations also included 
+    tsurls = c(schema_list$tableSchema$columns[["aboutUrl"]],
+               schema_list$tableSchema$columns[["propertyUrl"]],
+               schema_list$tableSchema$columns[["valueUrl"]])
+    tsurls  = na.omit(unique(tsurls))
+    escaped = urltools::url_decode(uriref(tsurls, base = ""))
+    not_escaped = urltools::url_decode(uriref(rep("", length = length(tsurls)), base = tsurls))
+
     provenance = data.table::rbindlist(
         list(
+            list(graph_names['assertion'], uriref("wasDerivedFrom", namespaces["prov:"]), metadatagraph[pred == "<http://www.w3.org/ns/csvw#url>", sub]),
             list(graph_names['assertion'], uriref("wasDerivedFrom", namespaces["prov:"]), uriref(hashes['full'], namespaces['sdr:'])),
-            list(graph_names['assertion'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = uriref('dateTime', namespaces['xsd:'])))
+            list(graph_names['assertion'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = uriref('dateTime', namespaces['xsd:']))),
+            data.table(
+                graph_names['assertion'], 
+                uriref('wasAttributedTo', base = namespaces['prov:']),
+                creators
+            ),
+            data.table(
+                escaped[escaped != not_escaped], 
+                uriref("wasDerivedFrom", base = namespaces['prov:']),
+                literal(tsurls[escaped != not_escaped], datatype = uriref("string", base = namespaces['xsd:']))
+            )
+            # data.table( # should be redundant but keep for now
+            #     graph_names['assertion'],
+            #     uriref("creator", base = namespaces['dc:']),
+            #     uriref("", base = creators)
+            # )
         )
     )
 
@@ -95,7 +128,12 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
     pubinfo = data.table::rbindlist(
         list(
             list(graph_names['nanopublication'], uriref("wasGeneratedBy", namespaces["prov:"]), uriref("", base = "http://github.com/rijpma/cower")),
-            list(graph_names['nanopublication'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = uriref('dateTime', namespaces['xsd:'])))
+            list(graph_names['nanopublication'], uriref("generatedAtTime", namespaces["prov:"]), literal(now, datatype = uriref('dateTime', namespaces['xsd:']))),
+            data.table(
+                graph_names['assertion'], 
+                uriref("creator", base = namespaces['dc:']), 
+                creators
+            )
         )
     )
     pubinfo[, graph := graph_names['pubinfo']]
@@ -109,5 +147,5 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes){
     )
     setnames(out, names(out), c("sub", "pred", "obj", "graph"))
 
-    return(out)
+    return(out[complete.cases(out)])
 }

@@ -22,36 +22,29 @@ cower = function(csv_path, json_path, nquad_path,
 
     named_graphs = graph_names(filehash['short'], base = schema_list$`@context`[[2]]$`@base`)
 
-    nanopub = nanopublication(schema_list = schema_list, 
-        graph_names = named_graphs,
-        namespaces = namespaces,
-        hashes = filehash)
-
-    nqwrite(dat = nanopub, 
-        nquadpath = nquad_path, 
-        append = FALSE,
-        compress = compress)
-
+    # mg is expanded json-ld and needs the original json
+    # or why not just the json path and make life easier?
     mg = metagraph(schema_list, graph_names = named_graphs)
     
-    nqwrite(dat = mg, 
-        nquadpath = nquad_path, 
-        append = TRUE,
-        compress = compress)
-
-    # if (compress) {
-    #     outfile = gzfile(nquad_path, open = "a")
-    # } else {
-    #     outfile = file(nquad_path, open = "a")
-    # }
-    # writeLines(text = mg, con = outfile)
-    # close(outfile)
-
     schema_list = fix_abouturl(schema_list)
     schema_list = prep_table_schema(schema_list = schema_list)
     schema_list = expand_prefixes(schema_list, namespaces)
     schema_list$tableSchema$columns = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)
     schema_list = datatypes_as_urirefs(schema_list)
+
+    # nanopublication needs the exanded schema_list
+    # maybve add check for == expanded
+    nanopub = nanopublication(schema_list = schema_list, 
+        graph_names = named_graphs,
+        namespaces = namespaces,
+        hashes = filehash,
+        metadatagraph = mg)
+
+    nqwrite(dat = rbindlist(list(nanopub, mg)),
+        nquadpath = nquad_path, 
+        append = FALSE,
+        compress = compress)
+
 
     if (max_size) csv_path = paste0("head -", format(max_size, scientific = FALSE), " ", csv_path)
     done = 0
