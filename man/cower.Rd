@@ -21,9 +21,9 @@ all rows at once. For large csv-files that take up considerable memory
 to convert, setting this to a lower number will preserve memory.}
 
 \item{max_size}{Set this parameter to an integer to only convert 
-part of the dataset. Useful for testing.}
+part of the dataset. Useful for testing. Depends on \code{head} command line tool.}
 
-\item{compress.}{Should cower output be a compressed (gz) file.
+\item{compress.}{Should cower output be a compressed (gz) file?
 Defaults to \code{TRUE} as nquad files can be very large relative
 to the original file (x10, roughly).}
 }

@@ -4,13 +4,12 @@
 \alias{graph_names}
 \title{Creates URIs for graphs}
 \usage{
-graph_names(path_to_csv, base = "https://iisg.amsterdam/resource/hsn/",
-  sub_path = "")
+graph_names(filehash, base = "")
 }
 \arguments{
-\item{path_to_csv}{The path to the csv file.}
-
 \item{base}{The base URI to be used in the rdf.}
+
+\item{path_to_csv}{The path to the csv file.}
 
 \item{sub_path}{Further path of the URI.}
 }

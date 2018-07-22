@@ -4,7 +4,7 @@
 \alias{literal}
 \title{Create literals}
 \usage{
-literal(string, datatype = "xsd:string", ...)
+literal(string, datatype = "xsd:string", lang = NA, ...)
 }
 \arguments{
 \item{string}{The value to be converted into a literal.}

@@ -5,12 +5,12 @@
 \title{Efficiently convert selected columns of \code{data.table} to 
 nquad statements}
 \usage{
-convert(df, schema_list, type = "", datatype = "")
+convert(dat, schema_list, type = "", datatype = "", done_so_far = 0)
 }
 \arguments{
-\item{df}{Name of the data.table as a length one character vector.}
-
 \item{type}{Type of nquads statements: \code{'uri'} or \code{'literal'}.}
+
+\item{df}{Name of the data.table as a length one character vector.}
 
 \item{column_names}{Names of the data.table to be converted as a character vector.}
 

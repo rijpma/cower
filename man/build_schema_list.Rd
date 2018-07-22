@@ -2,11 +2,35 @@
 % Please edit documentation in R/make_schema.R
 \name{build_schema_list}
 \alias{build_schema_list}
-\title{Create a basic json-ld metadata from a csv dataset.}
+\title{Create a metadata skeleton list from a csv dataset to make a JSON-LD description.}
 \usage{
-build_schema_list(csvpath, delimiter = ",", encoding = "UTF-8",
+build_schema_list(csvpath, delimiter = "auto", encoding = "UTF-8",
   base = "https://iisg.amsterdam/resource/", dataset_name = "")
 }
+\arguments{
+\item{csvpath}{Path to the csv file for which to create JSON-LD metadata.}
+
+\item{delimiter}{Delimiter of the file. Default is \code{"auto"} to let
+\code{data.table::fread} guess the delimiter. \code{fread} is good at that,
+but \code{"auto"} is not what the csvw-standard expects.}
+
+\item{encoding}{The encoding of the csv-file. Note that
+data.table::fread used elsewhere only acccepts UTF-8 and Latin1.}
+
+\item{base}{The base for the URIs that are to be created. You can also
+change this in the JSON file.}
+
+\item{dataset_name}{The name of the dataset. If empty (default),
+defaults to the basename of the csv file.}
+}
+\value{
+A list describing the csv file.
+}
 \description{
-Create a basic json-ld metadata from a csv dataset.
+Create a metadata skeleton list from a csv dataset to make a JSON-LD description.
+}
+\details{
+Obtain a JSON-LD description by writing the resulting list to JSON using
+\code{\link{write_schema_json}}. It is not recommended to edit the list in R,
+but rather to edit that JSON file to fully describe the csv file.
 }

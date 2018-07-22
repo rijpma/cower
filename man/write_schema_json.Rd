@@ -2,10 +2,10 @@
 % Please edit documentation in R/make_schema.R
 \name{write_schema_json}
 \alias{write_schema_json}
-\title{Write basic json-ld metadata to file.}
+\title{Write basic JSON-LD metadata to file.}
 \usage{
 write_schema_json(schema_list, jsonpath)
 }
 \description{
-Write basic json-ld metadata to file.
+Write basic JSON-LD metadata to file.
 }
