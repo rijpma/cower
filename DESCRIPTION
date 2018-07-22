@@ -1,6 +1,6 @@
 Package: cower
 Title: Convert csvs to nquads using json-ld data description
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Auke", "Rijpma", role = c("aut", "cre"), email = "auke.rijpma@gmail.com"),
     person("Rinke", "Hoekstra", role = c("ctb")),
