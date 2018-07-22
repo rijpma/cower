@@ -10,6 +10,7 @@
 #' literal("example", datatype="@@en")
 #' literal(630.6, datatype="xsd:float")
 #' literal(NA, datatype="xsd:integer")
+#' @export
 literal = function(string, datatype = "xsd:string", lang = NA, ...){
     # prettier way of doing this? Get datatype and connector based on content datatype?
     if (!is.na(lang)){
@@ -44,6 +45,7 @@ literal = function(string, datatype = "xsd:string", lang = NA, ...){
 #' @param path Further path of URI
 #' @examples
 #' uriref('rainy', base = 'http://www.weather.com/', path = 'weather/')
+#' @export
 uriref = function(string, base, path = '', ...){
     to_replace = "[ %+&{}]"
 
@@ -52,6 +54,7 @@ uriref = function(string, base, path = '', ...){
 }
 
 #' Create blank node
+#' @export
 bnode = function(n = 1){
     replicate(n, paste0("_:N", gsub("-", "", uuid::UUIDgenerate())))
      # N in nq serialisation to make NCName compliant-ish
@@ -87,6 +90,16 @@ convert = function(dat, schema_list,
           setNames(table_schema[, c("titles", "column", "type", "datatype", "valueUrl_base", "valueUrl_eval", "null")],
             c("titles", "column", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")))
     # fails when null not present
+
+    # if length of array in json == 1
+    # expand_prefixes() in its to-matrix conversion does not turn
+    # into backslash quoted vectors
+    # needs a fix that does not depend on strange to-matrix conversion
+    x$null = ifelse(x$null == "NULL" | stringi::stri_detect_fixed(x$null, '\"'),
+        x$null,
+        paste0('"', x$null, '"')
+    )
+
     x$type[1:nrow(table_schema)] = "uriref"
     x$newvar = x$titles
     x$newvar[1:nrow(table_schema)] = paste0(x$newvar[1:nrow(table_schema)], "_sub")
@@ -110,6 +123,8 @@ convert = function(dat, schema_list,
     # but for now this ugly solution
     convertstring = stringi::stri_replace_all_fixed(convertstring, "'NA'", "NA")
 
+    # deal with NULL by setting them to NA afterwards
+    # should be prettier
     nullstring = ifelse(x$null == "NULL", 
         "",
         paste0(
