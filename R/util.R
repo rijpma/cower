@@ -33,6 +33,10 @@ countlines = function(csv_path){
     return(as.numeric(n))
 }
 
+#' Read rdf file and create a data.table.
+#' @param path_to_rdf The path of the file.
+#' @param type the rdf serialisation, either 'ntriples' or 'nquads'
+#' @export
 read_rdf = function(path_to_rdf, type = c("ntriples", "nquads")){
     dat = readLines(path_to_rdf)
     dat = stringi::stri_split_fixed(dat, "\n", simplify = TRUE)
