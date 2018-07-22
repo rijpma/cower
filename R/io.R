@@ -1,4 +1,5 @@
 #' @import data.table
+#' @export
 nqwrite = function(dat, nquadpath, 
     append = FALSE, compress = TRUE){
 
