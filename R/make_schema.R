@@ -1,9 +1,26 @@
-#' Create a basic json-ld metadata from a csv dataset.
+#' Create a metadata skeleton list from a csv dataset to make a JSON-LD description.
+#'
+#' Create a metadata skeleton list from a csv dataset to make a JSON-LD description.
+#'
+#' Obtain a JSON-LD description by writing the resulting list to JSON using
+#' \code{\link{write_schema_json}}. It is not recommended to edit the list in R,
+#' but rather to edit that JSON file to fully describe the csv file.
+#' @param csvpath Path to the csv file for which to create JSON-LD metadata.
+#' @param delimiter Delimiter of the file. Default is \code{"auto"} to let
+#' \code{data.table::fread} guess the delimiter. \code{fread} is good at that,
+#' but \code{"auto"} is not what the csvw-standard expects.
+#' @param encoding The encoding of the csv-file. Note that
+#' data.table::fread used elsewhere only acccepts UTF-8 and Latin1.
+#' @param base The base for the URIs that are to be created. You can also
+#' change this in the JSON file.
+#' @param dataset_name The name of the dataset. If empty (default),
+#' defaults to the basename of the csv file.
+#' @return A list describing the csv file.
 #' @import data.table
 #' @export
 build_schema_list = function(csvpath,
-    delimiter = "auto", encoding = "UTF-8", 
-    base = "https://iisg.amsterdam/resource/", 
+    delimiter = "auto", encoding = "UTF-8",
+    base = "https://iisg.amsterdam/resource/",
     dataset_name = ""){
 
     dat = data.table::fread(csvpath, nrows = 100)
@@ -42,7 +59,7 @@ build_schema_list = function(csvpath,
     }
 
     # need to ensure that base ends in /
-    schlist$`@id` = paste0(base, basename(csvpath)) 
+    schlist$`@id` = paste0(base, basename(csvpath))
 
     schlist$`dc:modified` = list()
     schlist$`dc:modified`$`@value` = format(Sys.time(), "%Y-%m-%d")
@@ -62,7 +79,7 @@ build_schema_list = function(csvpath,
     return(schlist)
 }
 
-#' Write basic json-ld metadata to file.
+#' Write basic JSON-LD metadata to file.
 #' @export
 write_schema_json = function(schema_list, jsonpath){
     schema_as_json = jsonlite::toJSON(schema_list,
