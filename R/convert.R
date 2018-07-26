@@ -136,7 +136,18 @@ convert = function(dat, schema_list,
         )
     )
 
-    string_to_eval = c(convertstring, nullstring)
+    # because NA ignored with %in%
+    nastring = ifelse(x$null == "NULL",
+        "",
+        paste0(
+            dat, "[",
+            "is.na(", x$column, ")", 
+            ", `", x$newvar, "`",
+            " := ", "NA",
+            "]"
+            ))
+
+    string_to_eval = c(convertstring, nullstring, nastring)
     # save time and risky %chin% behaviour by dropping if NULL?
 
 
