@@ -1,3 +1,11 @@
+#' Access common namespaces
+#'
+#' Access common namespaces
+#' 
+#' @param namespace the namespace as a string
+#' @examples
+#' namespaces("rdf")
+#' @export
 namespaces = function(namespace){
     out = c(
         rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
