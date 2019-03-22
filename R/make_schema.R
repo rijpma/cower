@@ -47,7 +47,7 @@ build_schema_list = function(csvpath,
     schlist$`url` = basename(csvpath)
 
     schlist$`@context` = list()
-    schlist$`@context`[[1]] = "http://csvw.clariah-sdh.eculture.labs.vu.nl/csvw.json"
+    schlist$`@context`[[1]] = "https://raw.githubusercontent.com/CLARIAH/COW/master/csvw.json"
     schlist$`@context`[[2]] = list("@base" = base, "@language" = "en")
     schlist$`@context`[[3]] = yaml::read_yaml("https://raw.githubusercontent.com/CLARIAH/COW/master/cow/converter/util/namespaces.yaml")
     # not sure if this is where COW gets the list
