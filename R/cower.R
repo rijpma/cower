@@ -29,6 +29,7 @@ cower = function(csv_path, json_path, nquad_path,
     
     schema_list = fix_abouturl(schema_list)
     schema_list = prep_table_schema(schema_list = schema_list)
+    # if you want lists in the xUrls you should probably double the rows at this stage because expand_prefixes() only works on prefixes at start
     schema_list = expand_prefixes(schema_list, namespaces)
     schema_list$tableSchema$columns = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = F)
     schema_list = datatypes_as_urirefs(schema_list)
@@ -55,10 +56,20 @@ cower = function(csv_path, json_path, nquad_path,
     current_batch_size = batch_size
     header = data.table::fread(csv_path, header = TRUE, nrow = 1)
     while (current_batch_size == batch_size){
-        batch = data.table::fread(csv_path,
-            nrows = batch_size, skip = done + 1,
-            header = FALSE,
-            sep = schema_list$dialect$delimiter)
+
+        getout = FALSE
+        
+        tryCatch(
+            batch <- data.table::fread(csv_path,
+                nrows = batch_size, 
+                skip = done + 1,
+                header = FALSE,
+                sep = schema_list$dialect$delimiter),
+            error = function(x) getout <<- TRUE
+        )
+        
+        if (getout) break
+
         current_batch_size = nrow(batch)
 
         data.table::setnames(batch, names(batch), names(header))
