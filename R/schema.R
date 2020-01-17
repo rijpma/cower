@@ -12,6 +12,7 @@ get_namespaces = function(schema_list){
     return(namespaces)
 }
 
+#' @export
 expand_prefixes = function(schema_list, context){
     # also expands context part. 
     # data.frame becomes matrix.
@@ -131,10 +132,15 @@ fix_missing_virtuals = function(table_schema){
 fix_empty_titles = function(table_schema){
     # [] on titles reads as list in df and becomes NULL,
 
-    if (any(table_schema$virtual == FALSE & 
-        (sapply(table_schema$titles, is.null) |
-        is.na(table_schema$titles) | 
-        table_schema$titles == ""))){
+    if (! "titles" %in% colnames(table_schema)){
+        table_schema$titles = ""
+    }
+
+    if (any(
+            table_schema$virtual == FALSE 
+            & (sapply(table_schema$titles, is.null) 
+                | is.na(table_schema$titles) 
+                | table_schema$titles == ""))){
             warning("Non-virtual column missing title, creating random column name")
     }
 
