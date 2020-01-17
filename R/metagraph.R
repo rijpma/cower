@@ -83,7 +83,8 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes, metadat
                 pred = uriref('wasAttributedTo', base = namespaces['prov:']), 
                 obj = creators
             )
-        )
+        ),
+        use.names = FALSE
     )
 
     overall[, graph := bgraph]
@@ -119,7 +120,8 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes, metadat
             #     uriref("creator", base = namespaces['dc:']),
             #     uriref("", base = creators)
             # )
-        )
+        ),
+        use.names = FALSE
     )
 
     provenance[, graph := graph_names['provenance']]
@@ -134,7 +136,8 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes, metadat
                 uriref("creator", base = namespaces['dc:']), 
                 creators
             )
-        )
+        ),
+        use.names = FALSE
     )
     pubinfo[, graph := graph_names['pubinfo']]
 
@@ -143,7 +146,8 @@ nanopublication = function(schema_list, graph_names, namespaces, hashes, metadat
             provenance,
             pubinfo,
             overall
-        )
+        ),
+        use.names = FALSE
     )
     setnames(out, names(out), c("sub", "pred", "obj", "graph"))
 
