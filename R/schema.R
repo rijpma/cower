@@ -132,6 +132,7 @@ fix_missing_virtuals = function(table_schema){
 fix_empty_titles = function(table_schema){
     # [] on titles reads as list in df and becomes NULL,
 
+    # consolidate in one function checking all columns present
     if (! "titles" %in% colnames(table_schema)){
         table_schema$titles = ""
     }
@@ -142,6 +143,7 @@ fix_empty_titles = function(table_schema){
                 | is.na(table_schema$titles) 
                 | table_schema$titles == ""))){
             warning("Non-virtual column missing title, creating random column name")
+            # surely it always does this?
     }
 
     # separate column description where duplicates are allowed
@@ -173,11 +175,17 @@ insert_null = function(table_schema){
     return(table_schema)
 }
 
-insert_abouturl = function(table_schema, global_abouturl){
+insert_emptyurls = function(table_schema, global_abouturl, base){
     if (is.null(table_schema$aboutUrl)){
         table_schema$aboutUrl = global_abouturl
     } else {
         table_schema$aboutUrl = ifelse(is.na(table_schema$aboutUrl), global_abouturl, table_schema$aboutUrl)
+    }
+
+    if (is.null(table_schema$propertyUrl)){
+        table_schema$propertyUrl = paste0(base, table_schema$name) # tofix: something consistent
+    } else {
+        table_schema$propertyUrl = ifelse(is.na(table_schema$propertyUrl), paste0(base, table_schema$name), table_schema$propertyUrl)
     }
     
     return(table_schema)
@@ -199,7 +207,9 @@ prep_table_schema = function(schema_list){
     table_schema = fix_empty_titles(table_schema = table_schema)
     table_schema = add_namespaces(table_schema, base = schema_list$`@context`[[2]]$`@base`)
     table_schema = insert_null(table_schema)
-    table_schema = insert_abouturl(table_schema, global_abouturl = schema_list$tableSchema$aboutUrl)
+    table_schema = insert_emptyurls(table_schema, 
+        global_abouturl = schema_list$tableSchema$aboutUrl, 
+        base = schema_list$`@context`[[2]]$`@base`)
     table_schema = split_schema_uris(table_schema)
     table_schema = add_subject_base(table_schema, base = schema_list$`@context`[[2]]$`@base`)
     table_schema = add_schema_evals(table_schema)
