@@ -16,7 +16,6 @@ get_namespaces = function(schema_list){
 expand_prefixes = function(schema_list, context){
     # also expands context part. 
     # data.frame becomes matrix.
-    # Problem?
     if (!is(schema_list, "list")){
         # print(schema_list)
         return(sapply(schema_list, 
@@ -29,16 +28,20 @@ expand_prefixes = function(schema_list, context){
 }
 
 add_namespaces = function(table_schema, base){
+    # insert missing namespaces: xsd for datatype, base for *Url
+
     table_schema$datatype = ifelse(
         stringi::stri_detect_fixed(table_schema$datatype, ":"), 
-            table_schema$datatype, 
-            paste0("http://www.w3.org/2001/XMLSchema#", table_schema$datatype))
+        table_schema$datatype, 
+        paste0("http://www.w3.org/2001/XMLSchema#", table_schema$datatype))
 
     urlcolumns = colnames(table_schema)[grep("Url$", colnames(table_schema))]
     table_schema[, urlcolumns] = lapply(table_schema[, urlcolumns, drop = F], 
         function(x) {
             ifelse(
-                stringi::stri_detect_fixed(x, ":"), x, paste0(base, x)
+                stringi::stri_detect_fixed(x, ":"), 
+                x, 
+                paste0(base, x)
             )
         }
     )
@@ -47,18 +50,19 @@ add_namespaces = function(table_schema, base){
 }
 
 fix_abouturl = function(schema_list){
+    # add base to aboutUrls without namespace
+
     schema_list$tableSchema$aboutUrl = ifelse(
-        stringi::stri_detect_fixed(
-            schema_list$tableSchema$aboutUrl, 
-            ":"
-        ),
-    schema_list$tableSchema$aboutUrl,
-    paste0(schema_list$`@context`[[2]]$`@base`, schema_list$tableSchema$aboutUrl)
+        stringi::stri_detect_fixed(schema_list$tableSchema$aboutUrl, ":"),
+        schema_list$tableSchema$aboutUrl,
+        paste0(schema_list$`@context`[[2]]$`@base`, schema_list$tableSchema$aboutUrl)
     )
     return(schema_list)
 }
 
 split_schema_uris = function(table_schema){
+    # split out fixed base and variable column values,
+
     urlcolumns = colnames(table_schema)[grep("Url$", colnames(table_schema))]
     # urlcolumns = "valueUrl"
 
@@ -119,20 +123,22 @@ add_schema_evals = function(table_schema, global_aboutUrl){
 }
 
 fix_missing_virtuals = function(table_schema){
+    # add virtual column if missing and set to false if not specified for column (NA)
     if (! "virtual" %in% colnames(table_schema)){
         table_schema$virtual = FALSE
     }
-    table_schema$virtual = ifelse(is.na(table_schema$virtual),
-        FALSE, table_schema$virtual)
+    table_schema$virtual = ifelse(
+        is.na(table_schema$virtual),
+        FALSE, 
+        table_schema$virtual)
 
     return(table_schema)
 
 }
 
 fix_empty_titles = function(table_schema){
-    # [] on titles reads as list in df and becomes NULL,
+    # [] on titles reads as list in df and becomes NULL, 
 
-    # consolidate in one function checking all columns present
     if (! "titles" %in% colnames(table_schema)){
         table_schema$titles = ""
     }
@@ -159,7 +165,8 @@ add_subject_base = function(table_schema, base){
     if (is.null(table_schema$aboutUrl_base)){
         table_schema$aboutUrl_base = base
     } else {
-        table_schema$aboutUrl_base = ifelse(is.na(table_schema$aboutUrl_base), 
+        table_schema$aboutUrl_base = ifelse(
+            is.na(table_schema$aboutUrl_base), 
             base,
             table_schema$aboutUrl_base)
     }
@@ -194,7 +201,10 @@ insert_emptyurls = function(table_schema, global_abouturl, base){
 datatypes_as_urirefs = function(schema_list){
     # done on schema_list because non-expanded prefixes might still exist
     datatypes = schema_list$tableSchema$columns$datatype
-    datatypes = ifelse(grepl("^@", datatypes) | is.na(datatypes), datatypes, uriref(rep("", length(datatypes)), base = datatypes))
+    datatypes = ifelse(
+        grepl("^@", datatypes) | is.na(datatypes), 
+        datatypes, 
+        uriref(rep("", length(datatypes)), base = datatypes))
     schema_list$tableSchema$columns$datatype = datatypes
     return(schema_list)
 }
