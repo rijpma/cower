@@ -66,99 +66,92 @@ bnode = function(n = 1){
 #' Efficiently convert selected columns of \code{data.table} to 
 #' nquad statements
 #' 
-#' @param df Name of the data.table as a length one character vector.
-#' @param column_names Names of the data.table to be converted as a character vector.
-#' @param base Base of the URIs to be minted in \code{uriref},
-#' @param paths Further path of URI to be minted in \code{uriref}.
-#' @param type Type of nquads statements: \code{'uri'} or \code{'literal'}.
-#' @param datatypes Character vector containing the datatype of literals. May include language statements.
+#' @param dat Name of the data.table as a length one character vector.
+#' @param schema_list The schema list describing the csv.
+#' @param done_so_far Counter to offset row names in case of batched conversion
 #' @examples
-#' the_data = data.table(refs = c('a', 'b', 'c'), ltrl = c(1, 2, 3))
-#' convert(df = "the_data", column_names = "ltrl", type = 'literal', datatypes = 'xsd:int')
-#' convert(df = "the_data", column_names = "refs", type = 'uri', base = 'https://www.example.org/', paths = 'data/')
-#' print(the_data)
-convert = function(dat, schema_list, 
-    type = "", datatype = "", done_so_far = 0){
+convert = function(dat, schema_list, done_so_far = 0){
 
     dat = deparse(substitute(dat))
 
-    table_schema = as.data.frame(schema_list$tableSchema$columns, stringsAsFactors = FALSE)
-    table_schema = table_schema[order(table_schema$virtual, decreasing = TRUE), ]
-    # virtual is character here, but order still works
+    table_schema = schema_list$tableSchema$columns
 
-    x = rbind(table_schema[, c("titles", "column", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")],
-          setNames(table_schema[, c("titles", "column", "type", "datatype", "valueUrl_base", "valueUrl_eval", "null")],
-            c("titles", "column", "type", "datatype", "aboutUrl_base", "aboutUrl_eval", "null")))
-    # fails when null not present
+    table_schema$aboutUrl_eval = stringi::stri_replace_all_fixed(table_schema$aboutUrl_eval, ".I", stringi::stri_join("(.I + " , + done_so_far, ")"))
 
-    # if length of array in json == 1
-    # expand_prefixes() in its to-matrix conversion does not turn
-    # into backslash quoted vectors
-    # needs a fix that does not depend on strange to-matrix conversion
-    x$null = ifelse(x$null == "NULL" | stringi::stri_detect_fixed(x$null, '\"'),
-        x$null,
-        paste0('"', x$null, '"')
+    # if length of array in json == 1, expand_prefixes() in its to-matrix
+    # conversion does not turn into backslash quoted vectors. Needs a fix that
+    # does not depend on strange to-matrix conversion
+    table_schema$null = ifelse(
+        test = table_schema$null == "NULL" | stringi::stri_detect_fixed(table_schema$null, '\"'),
+        yes = table_schema$null,
+        no = paste0('"', table_schema$null, '"')
     )
 
-    x$type[1:nrow(table_schema)] = "uriref"
-    x$newvar = x$titles
-    x$newvar[1:nrow(table_schema)] = paste0(x$newvar[1:nrow(table_schema)], "_sub")
-    # x$titles[1:nrow(table_schema)] = paste0(x$titles[1:nrow(table_schema)], "_sub")
 
-    x$aboutUrl_eval = stringi::stri_replace_all_fixed(x$aboutUrl_eval, ".I", stringi::stri_join("(.I + " , + done_so_far, ")"))
+    filllist = list()
+    for (i in 1:nrow(table_schema)){
 
-  
-    convertstring = paste0(
-        dat, "[,",
-        "`", x$newvar, "`",
-        " := ", 
-        x$type, "(", 
-            "string = ", x$aboutUrl_eval, ", ",
-            "base = '", x$aboutUrl_base, "', ",
-            "datatype = '", x$datatype, # this quote needs to be fixed if you want to pass NA as NA
-        "')",
-        "]"
-    )
-    
-    # but for now this ugly solution
-    convertstring = stringi::stri_replace_all_fixed(convertstring, "'NA'", "NA")
+        # print(table_schema$aboutUrl_eval[i]) # + aboutUrl_base + done_so_far stuff for chuncking
+        # print(table_schema$propertyUrl_eval[i]) # is.na base schema_list$`@context`[[2]]$`@base` + colnames, propertyUrl_eval
+        # print(table_schema$valueUrl_eval[i])
+        about = paste0(
+            dat,
+            "[!",                       # nullstring
+            table_schema$name[1],
+            " %in% ",
+            table_schema$null[2],
+            ", ",
+            "uriref", "(",             # column
+            "base",    " = '", table_schema$aboutUrl_base[i], "', ",
+            "string",   " = ",  table_schema$aboutUrl_eval[i],
+            ")]")
+        property = paste0(
+            dat,
+            "[!",                       # nullstring
+            table_schema$name[1],
+            " %in% ",
+            table_schema$null[2],
+            ", ",
+            "uriref", "(",             # column
+            "base",    " = '", table_schema$propertyUrl_base[i], "', ",
+            "string",   " = ",  table_schema$propertyUrl_eval[i], # cannot be NA or NA returned
+            ")]")
+        value = paste0(
+            dat,
+            "[!",                       # nullstring
+            table_schema$name[1],
+            " %in% ",
+            table_schema$null[2],
+            ", ",
+            table_schema$type[i], "(", # column
+            "base",    " = '", table_schema$valueUrl_base[i], "', ",
+            "string",   " = ",  table_schema$valueUrl_eval[i], ", ",
+            "datatype"," = '", table_schema$datatype[i],      "')]") # quietly ignored if literal
 
-    # deal with NULL by setting them to NA afterwards
-    # should be prettier
-    nullstring = ifelse(x$null == "NULL", 
-        "",
-        paste0(
-            dat, "[",
-            x$column, " %in% ", x$null,
-            ", `", x$newvar, "`",
-            " := ", "NA",
-            "]"
+        # quoted NA into proper NA
+        about = stringi::stri_replace_all_fixed(about, "'NA'", "NA")
+        property = stringi::stri_replace_all_fixed(property, "'NA'", "NA")
+        value = stringi::stri_replace_all_fixed(value, "'NA'", "NA")
+
+        filllist[[i]] = data.table(
+            sub =  eval(parse(text = about), envir = parent.frame(1)), 
+            pred = eval(parse(text = property), envir = parent.frame(1)), 
+            obj =  eval(parse(text = value), envir = parent.frame(1))
         )
-    )
+    }
+
+    # and now do something on filllist
 
     # because NA ignored with %in%
-    nastring = ifelse(x$null == "NULL",
-        "",
-        paste0(
-            dat, "[",
-            "is.na(", x$column, ")", 
-            ", `", x$newvar, "`",
-            " := ", "NA",
-            "]"
-            ))
-
-    string_to_eval = c(convertstring, nullstring, nastring)
-    # save time and risky %chin% behaviour by dropping if NULL?
-
-
-    # string_to_eval = paste0(dat, "[, `", x$titles, 
-    #     "` := ", x$type, "(", 
-    #     x$aboutUrl_eval, ", ",
-    #     "base = '", x$aboutUrl_base, "', ",
-    #     "datatype = '", x$datatype,
-    #     "')]")
-
-    eval(parse(text = string_to_eval), envir = parent.frame(1))
+    # nastring = ifelse(x$null == "NULL",
+    #     "",
+    #     paste0(
+    #         dat, "[",
+    #         "is.na(", x$column, ")", 
+    #         ", `", x$newvar, "`",
+    #         " := ", "NA",
+    #         "]"
+    #         ))
 }
 
 colnames_to_predicates = function(schema_list){
