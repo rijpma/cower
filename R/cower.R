@@ -59,6 +59,7 @@ cower = function(csv_path, json_path, nquad_path,
 
         getout = FALSE
         
+        # catch remaining rows == 0
         tryCatch(
             batch <- data.table::fread(csv_path,
                 nrows = batch_size, 
@@ -74,15 +75,11 @@ cower = function(csv_path, json_path, nquad_path,
 
         data.table::setnames(batch, names(batch), names(header))
 
-        convert(dat = batch,
+        batch = convert(dat = batch,
             schema_list = schema_list,
             done_so_far = done)
 
         batch[, graph := named_graphs['assertion']]
-
-        batch = triples(batch, schema_list)
-
-        batch[, pred := colnames_to_predicates(schema_list = schema_list)[as.numeric(pred)]]
 
         nqwrite(dat = batch[complete.cases(batch), list(sub, pred, obj, graph)],
             nquadpath = nquad_path,

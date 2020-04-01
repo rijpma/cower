@@ -95,7 +95,7 @@ convert = function(dat, schema_list, done_so_far = 0){
         # print(table_schema$propertyUrl_eval[i]) # is.na base schema_list$`@context`[[2]]$`@base` + colnames, propertyUrl_eval
         # print(table_schema$valueUrl_eval[i])
         about = paste0(
-            dat,
+            "dat",
             "[!",                       # nullstring
             table_schema$name[1],
             " %in% ",
@@ -106,7 +106,7 @@ convert = function(dat, schema_list, done_so_far = 0){
             "string",   " = ",  table_schema$aboutUrl_eval[i],
             ")]")
         property = paste0(
-            dat,
+            "dat",
             "[!",                       # nullstring
             table_schema$name[1],
             " %in% ",
@@ -117,7 +117,7 @@ convert = function(dat, schema_list, done_so_far = 0){
             "string",   " = ",  table_schema$propertyUrl_eval[i], # cannot be NA or NA returned
             ")]")
         value = paste0(
-            dat,
+            "dat",
             "[!",                       # nullstring
             table_schema$name[1],
             " %in% ",
@@ -138,6 +138,8 @@ convert = function(dat, schema_list, done_so_far = 0){
             pred = eval(parse(text = property), envir = parent.frame(1)), 
             obj =  eval(parse(text = value), envir = parent.frame(1))
         )
+
+        return(rbindlist(filllist))
     }
 
     # and now do something on filllist

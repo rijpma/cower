@@ -106,6 +106,9 @@ add_schema_evals = function(table_schema, global_aboutUrl){
     # use column title for eval if completely unspecified
     table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval), table_schema$column, table_schema$valueUrl_eval)
 
+    # if propertyUrl_eval missing, set to "" to prevent NA
+    table_schema$propertyUrl_eval = ifelse(is.na(table_schema$propertyUrl_eval), "\"\"", table_schema$propertyUrl_eval)
+
     # replace {_row} with .I (why not stri_replace_last_fixed) ?
     table_schema[, grep("_eval$", names(table_schema))] = 
         lapply(
