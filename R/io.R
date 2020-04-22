@@ -11,17 +11,26 @@ nqwrite = function(dat, nquadpath,
         stop(paste("'append' is", append, ", but", nquadpath, "does not exist."))
     }
 
-    if (append) writemode = 'a' else writemode = 'w'
+    if (compress) compress_par = "gzip" else compress_par = "none"
 
-    if (compress) {
-        outfile = gzfile(nquadpath, open = writemode)
-    } else {
-        outfile = file(nquadpath, open = writemode)
-    }
+    # if (append) writemode = 'a' else writemode = 'w'
 
-    write.table(dat[complete.cases(pred, obj), list(sub, pred, obj, graph)], 
-        file = outfile, sep = ' ', quote = F, 
-        col.names = F, row.names = F, eol = " .\n")
+    # if (compress) {
+    #     outfile = gzfile(nquadpath, open = writemode)
+    # } else {
+    #     outfile = file(nquadpath, open = writemode)
+    # }
 
-    close(outfile)
+    # write.table(dat[complete.cases(pred, obj), list(sub, pred, obj, graph)], 
+    #     file = outfile, sep = ' ', quote = F, 
+    #     col.names = F, row.names = F, eol = " .\n")
+
+    # close(outfile)
+    data.table::fwrite(
+        dat[complete.cases(pred, obj), list(sub, pred, obj, graph)],
+        file = nquadpath,
+        compress = compress_par,
+        append = append,
+        sep = " ", eol = " .\n", quote = FALSE,
+        col.names = FALSE, row.names = FALSE)
 }

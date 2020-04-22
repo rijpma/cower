@@ -77,14 +77,17 @@ cower = function(csv_path, json_path, nquad_path,
 
         batch = convert(dat = batch,
             schema_list = schema_list,
-            done_so_far = done)
+            done_so_far = done,
+            compress = compress,
+            nquad_path = nquad_path,
+            named_graphs = named_graphs)
 
-        batch[, graph := named_graphs['assertion']]
+        # batch[, graph := named_graphs['assertion']]
 
-        nqwrite(dat = batch[complete.cases(batch), list(sub, pred, obj, graph)],
-            nquadpath = nquad_path,
-            append = TRUE,
-            compress = compress)
+        # nqwrite(dat = batch[complete.cases(batch), list(sub, pred, obj, graph)],
+        #     nquadpath = nquad_path,
+        #     append = TRUE,
+        #     compress = compress)
 
         done = done + current_batch_size
         cat("Converted", done, "rows.\n")

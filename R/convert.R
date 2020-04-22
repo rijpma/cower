@@ -70,7 +70,8 @@ bnode = function(n = 1){
 #' @param schema_list The schema list describing the csv.
 #' @param done_so_far Counter to offset row names in case of batched conversion
 #' @examples
-convert = function(dat, schema_list, done_so_far = 0){
+convert = function(dat, schema_list, nquad_path, named_graphs,
+    done_so_far = 0, compress = FALSE){
 
     dat = deparse(substitute(dat))
 
@@ -88,8 +89,9 @@ convert = function(dat, schema_list, done_so_far = 0){
     )
 
 
-    filllist = list()
+    filllist = vector(nrow(table_schema), mode = "list")
     for (i in 1:nrow(table_schema)){
+        cat(i, " of ", nrow(table_schema), "\n")
 
         # print(table_schema$aboutUrl_eval[i]) # + aboutUrl_base + done_so_far stuff for chuncking
         # print(table_schema$propertyUrl_eval[i]) # is.na base schema_list$`@context`[[2]]$`@base` + colnames, propertyUrl_eval
@@ -133,14 +135,21 @@ convert = function(dat, schema_list, done_so_far = 0){
         property = stringi::stri_replace_all_fixed(property, "'NA'", "NA")
         value = stringi::stri_replace_all_fixed(value, "'NA'", "NA")
 
-        filllist[[i]] = data.table(
+        # filllist[[i]] = data.table(
+        out = data.table(
             sub =  eval(parse(text = about), envir = parent.frame(1)), 
             pred = eval(parse(text = property), envir = parent.frame(1)), 
-            obj =  eval(parse(text = value), envir = parent.frame(1))
+            obj =  eval(parse(text = value), envir = parent.frame(1)),
+            graph = named_graphs['assertion']
         )
 
+        nqwrite(
+            dat = out[complete.cases(out), list(sub, pred, obj, graph)],
+            nquadpath = nquad_path,
+            append = TRUE,
+            compress = compress)
     }
-    return(rbindlist(filllist))
+    # return(rbindlist(filllist))
 
     # and now do something on filllist
 
