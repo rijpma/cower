@@ -103,6 +103,8 @@ add_schema_evals = function(table_schema, global_aboutUrl){
     table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval) & !is.na(table_schema$`csvw:value`), table_schema$`csvw:value`, table_schema$valueUrl_eval)
     # replace eval by empty string if missing and not csvw:value and uriref
     table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval) & table_schema$type == "uriref", "\"\"", table_schema$valueUrl_eval)
+    # use name for eval if still missing
+    table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval), table_schema$name, table_schema$valueUrl_eval)
     # use column title for eval if completely unspecified
     table_schema$valueUrl_eval = ifelse(is.na(table_schema$valueUrl_eval), table_schema$column, table_schema$valueUrl_eval)
 
