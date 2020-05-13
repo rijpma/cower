@@ -96,12 +96,13 @@ convert = function(dat, schema_list, nquad_path, named_graphs,
         # print(table_schema$aboutUrl_eval[i]) # + aboutUrl_base + done_so_far stuff for chuncking
         # print(table_schema$propertyUrl_eval[i]) # is.na base schema_list$`@context`[[2]]$`@base` + colnames, propertyUrl_eval
         # print(table_schema$valueUrl_eval[i])
+        # is it an idea to subset
         about = paste0(
             dat,
             "[!",                       # nullstring
-            table_schema$name[1],
+            table_schema$name[i],
             " %in% ",
-            table_schema$null[2],
+            table_schema$null[i],
             ", ",
             "uriref", "(",             # column
             "base",    " = '", table_schema$aboutUrl_base[i], "', ",
@@ -110,9 +111,9 @@ convert = function(dat, schema_list, nquad_path, named_graphs,
         property = paste0(
             dat,
             "[!",                       # nullstring
-            table_schema$name[1],
+            table_schema$name[i],
             " %in% ",
-            table_schema$null[2],
+            table_schema$null[i],
             ", ",
             "uriref", "(",             # column
             "base",    " = '", table_schema$propertyUrl_base[i], "', ",
@@ -121,9 +122,9 @@ convert = function(dat, schema_list, nquad_path, named_graphs,
         value = paste0(
             dat,
             "[!",                       # nullstring
-            table_schema$name[1],
+            table_schema$name[i],
             " %in% ",
-            table_schema$null[2],
+            table_schema$null[i],
             ", ",
             table_schema$type[i], "(", # column
             "base",    " = '", table_schema$valueUrl_base[i], "', ",
